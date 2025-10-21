@@ -20,6 +20,8 @@ import { LoadingState, CardLoading } from './ui/loading'
 import { EmptyState, TableEmptyState } from './ui/empty-state'
 import { GlobalSearch } from './GlobalSearch'
 import { SearchTrigger } from './SearchTrigger'
+import { ExportDialog } from './ExportDialog'
+import { ExportButton } from './ExportButton'
 import { useClients } from '../hooks/useClients'
 import { useClientKPIs, useBalanceSummary, useTransactions, useDeleteTransaction } from '../hooks/useTransactions'
 import type { Transaction, Client } from '../types'
@@ -38,6 +40,7 @@ export function ClientDashboard() {
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null)
   const [isDeleteTransactionDialogOpen, setIsDeleteTransactionDialogOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
   const { data: clients = [], isLoading: clientsLoading, error: clientsError } = useClients()
   
   // Set first client as active if none selected
@@ -167,13 +170,16 @@ export function ClientDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Dashboard Header with Search */}
+      {/* Dashboard Header with Search and Export */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">Manage your clients and transactions</p>
         </div>
-        <SearchTrigger onClick={() => setIsSearchOpen(true)} />
+        <div className="flex items-center space-x-3">
+          <ExportButton onClick={() => setIsExportDialogOpen(true)} />
+          <SearchTrigger onClick={() => setIsSearchOpen(true)} />
+        </div>
       </div>
 
       <Tabs value={activeClientId} onValueChange={setActiveClientId} className="w-full">
@@ -363,13 +369,20 @@ export function ClientDashboard() {
                       <h3 className="text-xl font-bold text-gray-900">Transaction History</h3>
                       <div className="flex-1 h-px bg-gray-200"></div>
                     </div>
-                    <Button 
-                      onClick={() => setIsTransactionFormOpen(true)}
-                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Transaction
-                    </Button>
+                    <div className="flex items-center space-x-3">
+                      <ExportButton 
+                        onClick={() => setIsExportDialogOpen(true)}
+                        variant="outline"
+                        className="bg-white hover:bg-gray-50"
+                      />
+                      <Button 
+                        onClick={() => setIsTransactionFormOpen(true)}
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Transaction
+                      </Button>
+                    </div>
                   </div>
                   {transactionsLoading ? (
                     <LoadingState message="Loading transactions..." />
@@ -472,6 +485,13 @@ export function ClientDashboard() {
         open={isSearchOpen}
         onOpenChange={setIsSearchOpen}
         onResultSelect={handleSearchResultSelect}
+      />
+
+      {/* Export Dialog */}
+      <ExportDialog
+        open={isExportDialogOpen}
+        onOpenChange={setIsExportDialogOpen}
+        defaultClientId={activeClientId}
       />
     </div>
   )
