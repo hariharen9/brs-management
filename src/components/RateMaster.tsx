@@ -23,6 +23,7 @@ import { Badge } from './ui/badge'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ratesService } from '../services/rates'
 import { useClients } from '../hooks/useClients'
+import { useUniqueComponents } from '../hooks/useRates'
 import type { Rate, WorkType, Unit } from '../types'
 
 interface EditingRate extends Partial<Rate> {
@@ -32,6 +33,7 @@ interface EditingRate extends Partial<Rate> {
 export function RateMaster() {
   const [editingRate, setEditingRate] = useState<EditingRate | null>(null)
   const [isAddingNew, setIsAddingNew] = useState(false)
+  const [customComponent, setCustomComponent] = useState('')
   
   const queryClient = useQueryClient()
   const { data: clients = [] } = useClients()
@@ -39,6 +41,7 @@ export function RateMaster() {
     queryKey: ['rates'],
     queryFn: ratesService.getAll,
   })
+  const { data: uniqueComponents = [] } = useUniqueComponents()
 
   const createRateMutation = useMutation({
     mutationFn: ratesService.create,
@@ -68,6 +71,12 @@ export function RateMaster() {
   const handleStartEdit = (rate: Rate) => {
     setEditingRate({ ...rate })
     setIsAddingNew(false)
+    // Set custom component if it's not in the dropdown list
+    if (rate.component && !uniqueComponents.includes(rate.component)) {
+      setCustomComponent(rate.component)
+    } else {
+      setCustomComponent('')
+    }
   }
 
   const handleStartAdd = () => {
@@ -80,6 +89,7 @@ export function RateMaster() {
       isNew: true,
     })
     setIsAddingNew(true)
+    setCustomComponent('')
   }
 
   const handleSave = async () => {
@@ -101,6 +111,7 @@ export function RateMaster() {
   const handleCancel = () => {
     setEditingRate(null)
     setIsAddingNew(false)
+    setCustomComponent('')
   }
 
   const handleDelete = async (id: string) => {
@@ -190,13 +201,44 @@ export function RateMaster() {
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <Input
-                      value={editingRate.component}
-                      onChange={(e) =>
-                        setEditingRate({ ...editingRate, component: e.target.value })
-                      }
-                      placeholder="Component name"
-                    />
+                    <div className="space-y-2">
+                      <Select
+                        value={editingRate.component || 'custom'}
+                        onValueChange={(value) => {
+                          if (value === 'custom') {
+                            setEditingRate({ ...editingRate, component: customComponent })
+                          } else {
+                            setEditingRate({ ...editingRate, component: value })
+                            setCustomComponent('')
+                          }
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select component" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {uniqueComponents.map((comp) => (
+                            <SelectItem key={comp} value={comp}>
+                              {comp}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="custom">
+                            <span className="text-blue-600">+ New component</span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      {(editingRate.component === customComponent || !uniqueComponents.includes(editingRate.component || '')) && (
+                        <Input
+                          placeholder="Enter component name"
+                          value={customComponent || editingRate.component}
+                          onChange={(e) => {
+                            setCustomComponent(e.target.value)
+                            setEditingRate({ ...editingRate, component: e.target.value })
+                          }}
+                        />
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Select
@@ -310,12 +352,44 @@ export function RateMaster() {
                   </TableCell>
                   <TableCell>
                     {editingRate?.id === rate.id ? (
-                      <Input
-                        value={editingRate.component}
-                        onChange={(e) =>
-                          setEditingRate({ ...editingRate, component: e.target.value })
-                        }
-                      />
+                      <div className="space-y-2">
+                        <Select
+                          value={editingRate.component || 'custom'}
+                          onValueChange={(value) => {
+                            if (value === 'custom') {
+                              setEditingRate({ ...editingRate, component: customComponent })
+                            } else {
+                              setEditingRate({ ...editingRate, component: value })
+                              setCustomComponent('')
+                            }
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {uniqueComponents.map((comp) => (
+                              <SelectItem key={comp} value={comp}>
+                                {comp}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="custom">
+                              <span className="text-blue-600">+ Edit component</span>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        {(editingRate.component === customComponent || !uniqueComponents.includes(editingRate.component || '')) && (
+                          <Input
+                            placeholder="Enter component name"
+                            value={customComponent || editingRate.component}
+                            onChange={(e) => {
+                              setCustomComponent(e.target.value)
+                              setEditingRate({ ...editingRate, component: e.target.value })
+                            }}
+                          />
+                        )}
+                      </div>
                     ) : (
                       rate.component
                     )}

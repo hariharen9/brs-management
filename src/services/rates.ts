@@ -84,5 +84,23 @@ export const ratesService = {
       .eq('id', id)
     
     if (error) throw error
+  },
+
+  async getUniqueComponents(clientId?: string): Promise<string[]> {
+    let query = supabase
+      .from('rates')
+      .select('component')
+    
+    if (clientId) {
+      query = query.or(`client_id.eq.${clientId},client_id.is.null`)
+    }
+    
+    const { data, error } = await query
+    
+    if (error) throw error
+    
+    // Get unique component names
+    const uniqueComponents = [...new Set((data || []).map(rate => rate.component))]
+    return uniqueComponents.sort()
   }
 }
