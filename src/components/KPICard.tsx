@@ -14,6 +14,7 @@ interface KPICardProps {
     isPositive: boolean
   }
   color?: 'blue' | 'green' | 'orange' | 'purple' | 'red'
+  compact?: boolean
 }
 
 const colorVariants = {
@@ -40,7 +41,8 @@ export function KPICard({
   prefix = '', 
   suffix = '', 
   trend,
-  color = 'blue'
+  color = 'blue',
+  compact = false
 }: KPICardProps) {
   return (
     <motion.div
@@ -55,26 +57,39 @@ export function KPICard({
         colorVariants[color],
         className
       )}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-sm font-semibold text-gray-700 group-hover:text-gray-900 transition-colors">
+        <CardHeader className={cn(
+          'flex flex-row items-center justify-between space-y-0',
+          compact ? 'pb-2 px-3 pt-3' : 'pb-3 px-6 pt-6'
+        )}>
+          <CardTitle className={cn(
+            'font-semibold text-gray-700 group-hover:text-gray-900 transition-colors',
+            compact ? 'text-xs lg:text-sm' : 'text-sm'
+          )}>
             {title}
           </CardTitle>
           {icon && (
             <div className={cn(
-              'p-2 rounded-full bg-white/60 group-hover:bg-white/80 transition-all',
-              iconColorVariants[color]
+              'rounded-full bg-white/60 group-hover:bg-white/80 transition-all',
+              iconColorVariants[color],
+              compact ? 'p-1.5 lg:p-2' : 'p-2'
             )}>
               {icon}
             </div>
           )}
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className={cn(
+          'space-y-2',
+          compact ? 'px-3 pb-3' : 'px-6 pb-6'
+        )}>
           <motion.div
             key={value}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.4, type: "spring" }}
-            className="text-3xl font-bold text-gray-900"
+            className={cn(
+              'font-bold text-gray-900',
+              compact ? 'text-lg lg:text-2xl xl:text-3xl' : 'text-3xl'
+            )}
           >
             {prefix}{value.toLocaleString()}{suffix}
           </motion.div>

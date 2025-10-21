@@ -1,13 +1,23 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Package, Truck, Scale, DollarSign } from 'lucide-react'
+import { Plus, Package, Truck, Scale, DollarSign, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Button } from './ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from './ui/dropdown-menu'
 import { KPICard } from './KPICard'
 import { TransactionForm } from './TransactionForm'
 import { AddClientForm } from './AddClientForm'
+import { EditClientForm } from './EditClientForm'
+import { DeleteClientDialog } from './DeleteClientDialog'
 import { useClients } from '../hooks/useClients'
-import { useClientKPIs, useBalanceSummary, useTransactions } from '../hooks/useTransactions'
+import { useClientKPIs, useBalanceSummary, useTransactions, useDeleteTransaction } from '../hooks/useTransactions'
+import type { Transaction, Client } from '../types'
 import { BalanceSummaryTable } from './BalanceSummaryTable'
 import { TransactionLogTable } from './TransactionLogTable'
 
@@ -15,6 +25,10 @@ export function ClientDashboard() {
   const [activeClientId, setActiveClientId] = useState<string>('')
   const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false)
   const [isAddClientFormOpen, setIsAddClientFormOpen] = useState(false)
+  const [isEditClientFormOpen, setIsEditClientFormOpen] = useState(false)
+  const [isDeleteClientDialogOpen, setIsDeleteClientDialogOpen] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [editingClient, setEditingClient] = useState<Client | null>(null)
   const { data: clients = [], isLoading: clientsLoading } = useClients()
   
   // Set first client as active if none selected
@@ -25,8 +39,55 @@ export function ClientDashboard() {
   const { data: kpis } = useClientKPIs(activeClientId)
   const { data: balanceSummary = [] } = useBalanceSummary(activeClientId)
   const { data: transactions = [] } = useTransactions(activeClientId)
+  const deleteTransaction = useDeleteTransaction()
 
   const activeClient = clients.find(c => c.id === activeClientId)
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setEditingTransaction(transaction)
+    setIsTransactionFormOpen(true)
+  }
+
+  const handleDeleteTransaction = async (transactionId: string) => {
+    if (confirm('Are you sure you want to delete this transaction?')) {
+      try {
+        await deleteTransaction.mutateAsync(transactionId)
+      } catch (error) {
+        console.error('Failed to delete transaction:', error)
+      }
+    }
+  }
+
+  const handleCloseTransactionForm = (open: boolean) => {
+    setIsTransactionFormOpen(open)
+    if (!open) {
+      setEditingTransaction(null)
+    }
+  }
+
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client)
+    setIsEditClientFormOpen(true)
+  }
+
+  const handleDeleteClient = (client: Client) => {
+    setEditingClient(client)
+    setIsDeleteClientDialogOpen(true)
+  }
+
+  const handleCloseEditClientForm = (open: boolean) => {
+    setIsEditClientFormOpen(open)
+    if (!open) {
+      setEditingClient(null)
+    }
+  }
+
+  const handleCloseDeleteClientDialog = (open: boolean) => {
+    setIsDeleteClientDialogOpen(open)
+    if (!open) {
+      setEditingClient(null)
+    }
+  }
 
   if (clientsLoading) {
     return (
@@ -55,13 +116,53 @@ export function ClientDashboard() {
           <TabsList className="h-auto bg-transparent p-0 w-full justify-start">
             <div className="flex items-center space-x-1 overflow-x-auto pb-2 w-full">
               {clients.map((client) => (
-                <TabsTrigger 
-                  key={client.id} 
-                  value={client.id} 
-                  className="relative px-6 py-3 text-sm font-medium transition-all hover:text-primary data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm border-b-2 border-transparent data-[state=active]:border-primary rounded-t-lg whitespace-nowrap bg-transparent"
-                >
-                  {client.name}
-                </TabsTrigger>
+                <div key={client.id} className="relative group">
+                  <TabsTrigger 
+                    value={client.id} 
+                    className="relative px-6 py-3 text-sm font-medium transition-all hover:text-primary data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm border-b-2 border-transparent data-[state=active]:border-primary rounded-t-lg whitespace-nowrap bg-transparent pr-10"
+                  >
+                    {client.name}
+                  </TabsTrigger>
+                  
+                  {/* Client Actions Dropdown */}
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 w-6 p-0 hover:bg-gray-200"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditClient(client)
+                          }}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit Client
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteClient(client)
+                          }}
+                          className="cursor-pointer text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete Client
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
               ))}
               <TabsTrigger 
                 value="add-client" 
@@ -106,34 +207,38 @@ export function ClientDashboard() {
                 </div>
 
                 {/* KPI Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
                   <KPICard
                     title="Total Received"
                     value={kpis?.totalReceived || 0}
-                    icon={<Package className="w-5 h-5" />}
+                    icon={<Package className="w-4 h-4 lg:w-5 lg:h-5" />}
                     suffix=" units"
                     color="blue"
+                    compact={true}
                   />
                   <KPICard
                     title="Total Delivered"
                     value={kpis?.totalDelivered || 0}
-                    icon={<Truck className="w-5 h-5" />}
+                    icon={<Truck className="w-4 h-4 lg:w-5 lg:h-5" />}
                     suffix=" units"
                     color="green"
+                    compact={true}
                   />
                   <KPICard
                     title="Current Balance"
                     value={kpis?.currentBalance || 0}
-                    icon={<Scale className="w-5 h-5" />}
+                    icon={<Scale className="w-4 h-4 lg:w-5 lg:h-5" />}
                     suffix=" units"
                     color={(kpis?.currentBalance || 0) < 0 ? 'red' : 'orange'}
+                    compact={true}
                   />
                   <KPICard
                     title="Total Billed"
                     value={kpis?.totalBilled || 0}
-                    icon={<DollarSign className="w-5 h-5" />}
+                    icon={<DollarSign className="w-4 h-4 lg:w-5 lg:h-5" />}
                     prefix="₹"
                     color="purple"
+                    compact={true}
                   />
                 </div>
 
@@ -157,13 +262,17 @@ export function ClientDashboard() {
                     </div>
                     <Button 
                       onClick={() => setIsTransactionFormOpen(true)}
-                      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all duration-200"
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Add Transaction
                     </Button>
                   </div>
-                  <TransactionLogTable data={transactions} />
+                  <TransactionLogTable 
+                    data={transactions} 
+                    onEdit={handleEditTransaction}
+                    onDelete={handleDeleteTransaction}
+                  />
                 </div>
               </motion.div>
             </TabsContent>
@@ -186,7 +295,7 @@ export function ClientDashboard() {
             <Button 
               onClick={() => setIsAddClientFormOpen(true)}
               size="lg"
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
             >
               <Plus className="w-5 h-5 mr-2" />
               Add New Client
@@ -199,9 +308,10 @@ export function ClientDashboard() {
       {activeClient && (
         <TransactionForm
           open={isTransactionFormOpen}
-          onOpenChange={setIsTransactionFormOpen}
+          onOpenChange={handleCloseTransactionForm}
           clientId={activeClient.id}
           clientName={activeClient.name}
+          editingTransaction={editingTransaction}
         />
       )}
 
@@ -209,6 +319,20 @@ export function ClientDashboard() {
       <AddClientForm
         open={isAddClientFormOpen}
         onOpenChange={setIsAddClientFormOpen}
+      />
+
+      {/* Edit Client Form */}
+      <EditClientForm
+        open={isEditClientFormOpen}
+        onOpenChange={handleCloseEditClientForm}
+        client={editingClient}
+      />
+
+      {/* Delete Client Dialog */}
+      <DeleteClientDialog
+        open={isDeleteClientDialogOpen}
+        onOpenChange={handleCloseDeleteClientDialog}
+        client={editingClient}
       />
     </div>
   )
