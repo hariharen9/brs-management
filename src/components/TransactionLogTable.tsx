@@ -38,7 +38,8 @@ export function TransactionLogTable({ data, onEdit, onDelete }: TransactionLogTa
 
   return (
     <Card>
-      <Table>
+      <div className="mobile-table-scroll">
+        <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Date</TableHead>
@@ -123,6 +124,7 @@ export function TransactionLogTable({ data, onEdit, onDelete }: TransactionLogTa
           ))}
         </TableBody>
       </Table>
+      </div>
     </Card>
   )
 }

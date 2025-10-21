@@ -62,7 +62,7 @@ export function AddClientForm({ open, onOpenChange }: AddClientFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[450px] shadow-2xl border-0">
+      <DialogContent className="sm:max-w-[450px] shadow-2xl border-0 p-4 sm:p-6 lg:p-8">
         <DialogHeader>
           <DialogTitle>Add New Client</DialogTitle>
           <DialogDescription>

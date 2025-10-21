@@ -43,7 +43,7 @@ export function ConfirmationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] shadow-2xl border-0">
+      <DialogContent className="sm:max-w-[425px] shadow-2xl border-0 p-4 sm:p-6 lg:p-8">
         <DialogHeader>
           <DialogTitle className={`flex items-center space-x-2 ${variant === 'destructive' ? 'text-red-600' : 'text-blue-600'}`}>
             <Icon className="w-5 h-5" />

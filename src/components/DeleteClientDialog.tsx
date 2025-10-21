@@ -52,7 +52,7 @@ export function DeleteClientDialog({ open, onOpenChange, client }: DeleteClientD
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[520px] shadow-2xl border-0">
+      <DialogContent className="sm:max-w-[520px] shadow-2xl border-0 p-4 sm:p-6 lg:p-8">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 text-red-600">
             <AlertTriangle className="w-5 h-5" />
