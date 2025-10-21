@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
+import { ConfirmationDialog } from './ConfirmationDialog'
 import {
   Select,
   SelectContent,
@@ -34,6 +35,8 @@ export function RateMaster() {
   const [editingRate, setEditingRate] = useState<EditingRate | null>(null)
   const [isAddingNew, setIsAddingNew] = useState(false)
   const [customComponent, setCustomComponent] = useState('')
+  const [rateToDelete, setRateToDelete] = useState<string | null>(null)
+  const [isDeleteRateDialogOpen, setIsDeleteRateDialogOpen] = useState(false)
   
   const queryClient = useQueryClient()
   const { data: clients = [] } = useClients()
@@ -115,9 +118,15 @@ export function RateMaster() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this rate?')) {
+    setRateToDelete(id)
+    setIsDeleteRateDialogOpen(true)
+  }
+
+  const confirmDeleteRate = async () => {
+    if (rateToDelete) {
       try {
-        await deleteRateMutation.mutateAsync(id)
+        await deleteRateMutation.mutateAsync(rateToDelete)
+        setRateToDelete(null)
       } catch (error) {
         console.error('Failed to delete rate:', error)
       }
@@ -503,6 +512,18 @@ export function RateMaster() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Rate Confirmation */}
+      <ConfirmationDialog
+        open={isDeleteRateDialogOpen}
+        onOpenChange={setIsDeleteRateDialogOpen}
+        title="Delete Rate"
+        description="Are you sure you want to delete this rate? This will affect future transaction calculations."
+        confirmText="Delete Rate"
+        variant="destructive"
+        onConfirm={confirmDeleteRate}
+        isLoading={deleteRateMutation.isPending}
+      />
     </div>
   )
 }

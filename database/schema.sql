@@ -76,10 +76,10 @@ ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rates ENABLE ROW LEVEL SECURITY;
 
--- For now, allow all operations (can be refined later with authentication)
-CREATE POLICY "Allow all operations on clients" ON clients FOR ALL USING (true);
-CREATE POLICY "Allow all operations on transactions" ON transactions FOR ALL USING (true);
-CREATE POLICY "Allow all operations on rates" ON rates FOR ALL USING (true);
+-- Authentication-based policies (only authenticated users can access data)
+CREATE POLICY "Authenticated users can manage clients" ON clients FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Authenticated users can manage transactions" ON transactions FOR ALL USING (auth.role() = 'authenticated');
+CREATE POLICY "Authenticated users can manage rates" ON rates FOR ALL USING (auth.role() = 'authenticated');
 
 -- Sample data for development
 INSERT INTO clients (name, contact_person) VALUES 
