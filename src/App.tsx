@@ -9,6 +9,8 @@ import { Analytics } from './components/Analytics'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useRealtimeSubscription } from './hooks/useRealtimeSubscription'
+import { Toaster } from './components/Toaster'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { queryClient } from './lib/queryClient'
 
 function Navigation() {
@@ -140,16 +142,19 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <ProtectedRoute>
-            <AppContent />
-          </ProtectedRoute>
-        </Router>
-      </AuthProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Router>
+            <ProtectedRoute>
+              <AppContent />
+            </ProtectedRoute>
+          </Router>
+        </AuthProvider>
+        <Toaster />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ErrorBoundary>
   )
 }
 

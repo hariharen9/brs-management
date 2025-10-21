@@ -25,6 +25,7 @@ import {
 import { useCreateTransaction, useUpdateTransaction } from '../hooks/useTransactions'
 import { useUniqueComponents } from '../hooks/useRates'
 import { ratesService } from '../services/rates'
+import { handleError, showSuccessToast } from '../lib/errorHandling'
 import type { Transaction, TransactionType, WorkType, Unit } from '../types'
 
 const transactionSchema = z.object({
@@ -139,9 +140,13 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
             form.setValue('rate_applied', rate)
           } else {
             console.log('No rate found for this combination')
+            // Show a warning toast for missing rate
+            handleError(new Error(`No rate configured for ${component} - ${workType} - ${unit}. Please set up rates in Rate Master.`), 'rate lookup')
           }
         })
-        .catch(console.error)
+        .catch((error) => {
+          handleError(error, 'looking up rate')
+        })
         .finally(() => setIsLoadingRate(false))
     }
   }, [clientId, clientName, component, workType, unit, transactionType, form])
@@ -156,6 +161,12 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
 
   const onSubmit = async (data: TransactionFormData) => {
     try {
+      // Validation
+      if (!data.qty_out || data.qty_out <= 0) {
+        handleError(new Error('Quantity must be greater than 0'), 'validation')
+        return
+      }
+
       // Set quantities based on transaction type
       if (data.transaction_type === 'Received') {
         data.qty_in = data.qty_out || 0
@@ -174,13 +185,15 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
           id: editingTransaction.id,
           updates: data
         })
+        showSuccessToast('Transaction updated successfully')
       } else {
         await createTransaction.mutateAsync(data)
+        showSuccessToast('Transaction created successfully')
       }
       
       onOpenChange(false)
     } catch (error) {
-      console.error(`Failed to ${isEditing ? 'update' : 'create'} transaction:`, error)
+      handleError(error, `${isEditing ? 'updating' : 'creating'} transaction`)
     }
   }
 
