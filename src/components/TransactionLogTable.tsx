@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Edit, Trash2, MoreHorizontal } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -9,13 +10,22 @@ import {
 } from './ui/table'
 import { Card } from './ui/card'
 import { Badge } from './ui/badge'
+import { Button } from './ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
 import type { Transaction } from '../types'
 
 interface TransactionLogTableProps {
   data: Transaction[]
+  onEdit?: (transaction: Transaction) => void
+  onDelete?: (transactionId: string) => void
 }
 
-export function TransactionLogTable({ data }: TransactionLogTableProps) {
+export function TransactionLogTable({ data, onEdit, onDelete }: TransactionLogTableProps) {
   if (data.length === 0) {
     return (
       <Card className="p-8">
@@ -41,6 +51,7 @@ export function TransactionLogTable({ data }: TransactionLogTableProps) {
             <TableHead>Work Type</TableHead>
             <TableHead className="text-right">Rate</TableHead>
             <TableHead className="text-right">Billed Amount</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -77,6 +88,32 @@ export function TransactionLogTable({ data }: TransactionLogTableProps) {
               </TableCell>
               <TableCell className="text-right font-medium">
                 {transaction.billed_amount ? `₹${transaction.billed_amount.toLocaleString()}` : '-'}
+              </TableCell>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => onEdit?.(transaction)}
+                      className="cursor-pointer"
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onDelete?.(transaction.id)}
+                      className="cursor-pointer text-red-600 focus:text-red-600"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </motion.tr>
           ))}

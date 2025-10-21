@@ -57,7 +57,7 @@
   }
 }
 
-/* Fix for dialog transparency issue */
+/* Fix for dialog and dropdown transparency issues */
 @layer components {
   [data-radix-popper-content-wrapper] {
     z-index: 50 !important;
@@ -66,5 +66,38 @@
   [data-state="open"][data-radix-dialog-content] {
     background-color: white !important;
     border: 1px solid hsl(var(--color-border)) !important;
+  }
+  
+  /* Fix for select and dropdown menu transparency */
+  [data-radix-select-content] {
+    background-color: white !important;
+    border: 1px solid hsl(var(--color-border)) !important;
+  }
+  
+  [data-radix-dropdown-menu-content] {
+    background-color: white !important;
+    border: 1px solid hsl(var(--color-border)) !important;
+  }
+  
+  /* Ensure select items are visible */
+  [data-radix-select-item] {
+    background-color: transparent !important;
+  }
+  
+  [data-radix-select-item][data-highlighted] {
+    background-color: hsl(var(--color-accent)) !important;
+  }
+  
+  /* Enhanced modal styling */
+  [data-radix-dialog-content] {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    border-radius: 1rem !important;
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
+  }
+  
+  /* Smooth animations for modals */
+  [data-radix-dialog-overlay] {
+    backdrop-filter: blur(8px) !important;
+    background: rgba(0, 0, 0, 0.6) !important;
   }
 }

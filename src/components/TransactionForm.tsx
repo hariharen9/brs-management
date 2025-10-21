@@ -22,9 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select'
-import { useCreateTransaction } from '../hooks/useTransactions'
+import { useCreateTransaction, useUpdateTransaction } from '../hooks/useTransactions'
 import { ratesService } from '../services/rates'
-import type { TransactionType, WorkType, Unit } from '../types'
+import type { Transaction, TransactionType, WorkType, Unit } from '../types'
 
 const transactionSchema = z.object({
   client_id: z.string().min(1, 'Client is required'),
@@ -48,11 +48,15 @@ interface TransactionFormProps {
   onOpenChange: (open: boolean) => void
   clientId: string
   clientName: string
+  editingTransaction?: Transaction | null
 }
 
-export function TransactionForm({ open, onOpenChange, clientId, clientName }: TransactionFormProps) {
+export function TransactionForm({ open, onOpenChange, clientId, clientName, editingTransaction }: TransactionFormProps) {
   const [isLoadingRate, setIsLoadingRate] = useState(false)
   const createTransaction = useCreateTransaction()
+  const updateTransaction = useUpdateTransaction()
+  
+  const isEditing = !!editingTransaction
 
   const form = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -71,6 +75,41 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName }: Tr
       billed_amount: null,
     },
   })
+
+  // Reset form when editingTransaction changes
+  useEffect(() => {
+    if (editingTransaction) {
+      form.reset({
+        client_id: editingTransaction.client_id,
+        date: editingTransaction.date,
+        dc_no: editingTransaction.dc_no,
+        component: editingTransaction.component,
+        lot_no: editingTransaction.lot_no,
+        transaction_type: editingTransaction.transaction_type,
+        qty_in: editingTransaction.qty_in,
+        qty_out: editingTransaction.qty_out || editingTransaction.qty_in, // Use qty_out for display, fallback to qty_in
+        work_type: editingTransaction.work_type,
+        unit: editingTransaction.unit,
+        rate_applied: editingTransaction.rate_applied,
+        billed_amount: editingTransaction.billed_amount,
+      })
+    } else {
+      form.reset({
+        client_id: clientId,
+        date: new Date().toISOString().split('T')[0],
+        dc_no: '',
+        component: '',
+        lot_no: '',
+        transaction_type: 'Received',
+        qty_in: null,
+        qty_out: null,
+        work_type: null,
+        unit: null,
+        rate_applied: null,
+        billed_amount: null,
+      })
+    }
+  }, [editingTransaction, clientId, form])
 
   const watchedFields = form.watch(['transaction_type', 'component', 'work_type', 'unit', 'qty_out', 'rate_applied'])
   const [transactionType, component, workType, unit, qtyOut, rateApplied] = watchedFields
@@ -118,43 +157,64 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName }: Tr
         data.qty_out = data.qty_out || 0
       }
 
-      await createTransaction.mutateAsync(data)
+      if (isEditing && editingTransaction) {
+        await updateTransaction.mutateAsync({
+          id: editingTransaction.id,
+          updates: data
+        })
+      } else {
+        await createTransaction.mutateAsync(data)
+      }
+      
       onOpenChange(false)
-      form.reset()
     } catch (error) {
-      console.error('Failed to create transaction:', error)
+      console.error(`Failed to ${isEditing ? 'update' : 'create'} transaction:`, error)
     }
   }
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      form.reset()
-    }
     onOpenChange(newOpen)
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto shadow-2xl border-0">
         <DialogHeader>
-          <DialogTitle>Add New Transaction</DialogTitle>
+          <DialogTitle>
+            {isEditing ? 'Edit Transaction' : 'Add New Transaction'}
+          </DialogTitle>
           <DialogDescription>
-            Add a new transaction for <strong>{clientName}</strong>
+            {isEditing ? 'Update the transaction details' : 'Add a new transaction'} for <strong>{clientName}</strong>
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Client Info Display */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-blue-800">Client:</span>
-              <span className="text-sm text-blue-700">{clientName}</span>
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <span className="text-sm font-semibold text-blue-800">Client:</span>
+                <span className="text-sm font-medium text-blue-700">{clientName}</span>
+              </div>
+              {isEditing && (
+                <div className="text-xs text-blue-600 bg-blue-200 px-3 py-1 rounded-full font-medium">
+                  ✏️ Editing Mode
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3 pb-2 border-b border-gray-100">
+              <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
+              <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Basic Information</h4>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">Date</Label>
               <Input
                 id="date"
                 type="date"
@@ -177,8 +237,16 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName }: Tr
               )}
             </div>
           </div>
+          </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* Product Details */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3 pb-2 border-b border-gray-100">
+              <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+              <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Product Details</h4>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="component">Component</Label>
               <Input
@@ -203,8 +271,16 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName }: Tr
               )}
             </div>
           </div>
+          </div>
 
-          <div className="space-y-2">
+          {/* Transaction Details */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3 pb-2 border-b border-gray-100">
+              <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+              <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Transaction Details</h4>
+            </div>
+            
+            <div className="space-y-2">
             <Label>Transaction Type</Label>
             <Select
               value={transactionType}
@@ -231,6 +307,7 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName }: Tr
                 setValueAs: (value) => value === '' ? null : parseFloat(value) 
               })}
             />
+          </div>
           </div>
 
           <AnimatePresence>
@@ -315,22 +392,24 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName }: Tr
             )}
           </AnimatePresence>
 
-          <DialogFooter>
+          <DialogFooter className="gap-3 pt-6 border-t border-gray-100">
             <Button
               type="button"
               variant="outline"
               onClick={() => handleOpenChange(false)}
+              className="rounded-lg px-6"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={createTransaction.isPending}
+              disabled={createTransaction.isPending || updateTransaction.isPending}
+              className="rounded-lg px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              {createTransaction.isPending && (
+              {(createTransaction.isPending || updateTransaction.isPending) && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Add Transaction
+              {isEditing ? 'Update Transaction' : 'Add Transaction'}
             </Button>
           </DialogFooter>
         </form>

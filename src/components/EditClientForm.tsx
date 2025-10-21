@@ -1,3 +1,4 @@
+import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,7 +14,8 @@ import {
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
-import { useCreateClient } from '../hooks/useClients'
+import { useUpdateClient } from '../hooks/useClients'
+import type { Client } from '../types'
 
 const clientSchema = z.object({
   name: z.string().min(1, 'Company name is required'),
@@ -22,32 +24,47 @@ const clientSchema = z.object({
 
 type ClientFormData = z.infer<typeof clientSchema>
 
-interface AddClientFormProps {
+interface EditClientFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  client: Client | null
 }
 
-export function AddClientForm({ open, onOpenChange }: AddClientFormProps) {
-  const createClient = useCreateClient()
+export function EditClientForm({ open, onOpenChange, client }: EditClientFormProps) {
+  const updateClient = useUpdateClient()
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
-      name: '',
-      contact_person: '',
+      name: client?.name || '',
+      contact_person: client?.contact_person || '',
     },
   })
 
+  // Reset form when client changes
+  React.useEffect(() => {
+    if (client) {
+      form.reset({
+        name: client.name,
+        contact_person: client.contact_person || '',
+      })
+    }
+  }, [client, form])
+
   const onSubmit = async (data: ClientFormData) => {
+    if (!client) return
+    
     try {
-      await createClient.mutateAsync({
-        name: data.name,
-        contact_person: data.contact_person || null,
+      await updateClient.mutateAsync({
+        id: client.id,
+        updates: {
+          name: data.name,
+          contact_person: data.contact_person || null,
+        }
       })
       onOpenChange(false)
-      form.reset()
     } catch (error) {
-      console.error('Failed to create client:', error)
+      console.error('Failed to update client:', error)
     }
   }
 
@@ -62,9 +79,9 @@ export function AddClientForm({ open, onOpenChange }: AddClientFormProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[450px] shadow-2xl border-0">
         <DialogHeader>
-          <DialogTitle>Add New Client</DialogTitle>
+          <DialogTitle>Edit Client</DialogTitle>
           <DialogDescription>
-            Add a new client to the system. You can manage their rates and transactions after creation.
+            Update the client information below.
           </DialogDescription>
         </DialogHeader>
 
@@ -101,13 +118,13 @@ export function AddClientForm({ open, onOpenChange }: AddClientFormProps) {
             </Button>
             <Button
               type="submit"
-              disabled={createClient.isPending}
+              disabled={updateClient.isPending}
               className="rounded-lg px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              {createClient.isPending && (
+              {updateClient.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Add Client
+              Update Client
             </Button>
           </DialogFooter>
         </form>
