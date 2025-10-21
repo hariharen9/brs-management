@@ -4,6 +4,8 @@ import { Plus, Edit, Trash2, Save, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { ConfirmationDialog } from './ConfirmationDialog'
+import { LoadingState, TableLoading } from './ui/loading'
+import { EmptyState, TableEmptyState } from './ui/empty-state'
 import {
   Select,
   SelectContent,
@@ -25,6 +27,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ratesService } from '../services/rates'
 import { useClients } from '../hooks/useClients'
 import { useUniqueComponents } from '../hooks/useRates'
+import { handleError, showSuccessToast } from '../lib/errorHandling'
 import type { Rate, WorkType, Unit } from '../types'
 
 interface EditingRate extends Partial<Rate> {
@@ -39,8 +42,8 @@ export function RateMaster() {
   const [isDeleteRateDialogOpen, setIsDeleteRateDialogOpen] = useState(false)
   
   const queryClient = useQueryClient()
-  const { data: clients = [] } = useClients()
-  const { data: rates = [], isLoading } = useQuery({
+  const { data: clients = [], error: clientsError } = useClients()
+  const { data: rates = [], isLoading, error: ratesError } = useQuery({
     queryKey: ['rates'],
     queryFn: ratesService.getAll,
   })
@@ -52,7 +55,11 @@ export function RateMaster() {
       queryClient.invalidateQueries({ queryKey: ['rates'] })
       setEditingRate(null)
       setIsAddingNew(false)
+      showSuccessToast('Rate created successfully')
     },
+    onError: (error) => {
+      handleError(error, 'creating rate')
+    }
   })
 
   const updateRateMutation = useMutation({
@@ -61,14 +68,22 @@ export function RateMaster() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rates'] })
       setEditingRate(null)
+      showSuccessToast('Rate updated successfully')
     },
+    onError: (error) => {
+      handleError(error, 'updating rate')
+    }
   })
 
   const deleteRateMutation = useMutation({
     mutationFn: ratesService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rates'] })
+      showSuccessToast('Rate deleted successfully')
     },
+    onError: (error) => {
+      handleError(error, 'deleting rate')
+    }
   })
 
   const handleStartEdit = (rate: Rate) => {
@@ -98,6 +113,16 @@ export function RateMaster() {
   const handleSave = async () => {
     if (!editingRate) return
 
+    // Validation
+    if (!editingRate.component?.trim()) {
+      handleError(new Error('Component name is required'), 'validation')
+      return
+    }
+    if (!editingRate.rate || editingRate.rate <= 0) {
+      handleError(new Error('Rate must be greater than 0'), 'validation')
+      return
+    }
+
     try {
       if (editingRate.isNew) {
         const { isNew, id, created_at, ...rateData } = editingRate
@@ -107,7 +132,7 @@ export function RateMaster() {
         await updateRateMutation.mutateAsync({ id, updates })
       }
     } catch (error) {
-      console.error('Failed to save rate:', error)
+      // Error handling is done in mutation onError
     }
   }
 
@@ -128,7 +153,7 @@ export function RateMaster() {
         await deleteRateMutation.mutateAsync(rateToDelete)
         setRateToDelete(null)
       } catch (error) {
-        console.error('Failed to delete rate:', error)
+        // Error handling is done in mutation onError
       }
     }
   }
@@ -140,10 +165,21 @@ export function RateMaster() {
   }
 
   if (isLoading) {
+    return <LoadingState message="Loading rates..." size="lg" className="h-64" />
+  }
+
+  if (ratesError) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <EmptyState
+        icon={<Plus className="w-8 h-8" />}
+        title="Failed to Load Rates"
+        description="There was an error loading the rate configuration. Please try refreshing the page."
+        action={{
+          label: "Refresh Page",
+          onClick: () => window.location.reload(),
+          variant: "outline"
+        }}
+      />
     )
   }
 
@@ -505,10 +541,15 @@ export function RateMaster() {
             </TableBody>
           </Table>
 
-          {rates.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No rates configured. Add your first rate to get started.
-            </div>
+          {rates.length === 0 && !isAddingNew && (
+            <TableEmptyState
+              title="No Rates Configured"
+              description="Set up your first rate to start calculating transaction costs automatically."
+              action={{
+                label: "Add First Rate",
+                onClick: handleStartAdd
+              }}
+            />
           )}
         </CardContent>
       </Card>

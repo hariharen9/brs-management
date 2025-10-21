@@ -16,11 +16,14 @@ import { AddClientForm } from './AddClientForm'
 import { EditClientForm } from './EditClientForm'
 import { DeleteClientDialog } from './DeleteClientDialog'
 import { ConfirmationDialog } from './ConfirmationDialog'
+import { LoadingState, CardLoading } from './ui/loading'
+import { EmptyState, TableEmptyState } from './ui/empty-state'
 import { useClients } from '../hooks/useClients'
 import { useClientKPIs, useBalanceSummary, useTransactions, useDeleteTransaction } from '../hooks/useTransactions'
 import type { Transaction, Client } from '../types'
 import { BalanceSummaryTable } from './BalanceSummaryTable'
 import { TransactionLogTable } from './TransactionLogTable'
+import { handleError, showSuccessToast } from '../lib/errorHandling'
 
 export function ClientDashboard() {
   const [activeClientId, setActiveClientId] = useState<string>('')
@@ -32,16 +35,16 @@ export function ClientDashboard() {
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null)
   const [isDeleteTransactionDialogOpen, setIsDeleteTransactionDialogOpen] = useState(false)
-  const { data: clients = [], isLoading: clientsLoading } = useClients()
+  const { data: clients = [], isLoading: clientsLoading, error: clientsError } = useClients()
   
   // Set first client as active if none selected
   if (!activeClientId && clients.length > 0) {
     setActiveClientId(clients[0].id)
   }
 
-  const { data: kpis } = useClientKPIs(activeClientId)
-  const { data: balanceSummary = [] } = useBalanceSummary(activeClientId)
-  const { data: transactions = [] } = useTransactions(activeClientId)
+  const { data: kpis, isLoading: kpisLoading, error: kpisError } = useClientKPIs(activeClientId)
+  const { data: balanceSummary = [], isLoading: balanceLoading, error: balanceError } = useBalanceSummary(activeClientId)
+  const { data: transactions = [], isLoading: transactionsLoading, error: transactionsError } = useTransactions(activeClientId)
   const deleteTransaction = useDeleteTransaction()
 
   const activeClient = clients.find(c => c.id === activeClientId)
@@ -61,8 +64,9 @@ export function ClientDashboard() {
       try {
         await deleteTransaction.mutateAsync(transactionToDelete)
         setTransactionToDelete(null)
+        showSuccessToast('Transaction deleted successfully')
       } catch (error) {
-        console.error('Failed to delete transaction:', error)
+        handleError(error, 'deleting transaction')
       }
     }
   }
@@ -99,22 +103,35 @@ export function ClientDashboard() {
   }
 
   if (clientsLoading) {
+    return <LoadingState message="Loading clients..." size="lg" className="h-64" />
+  }
+
+  if (clientsError) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <EmptyState
+        icon={<Package className="w-8 h-8" />}
+        title="Failed to Load Clients"
+        description="There was an error loading your clients. Please try refreshing the page."
+        action={{
+          label: "Refresh Page",
+          onClick: () => window.location.reload(),
+          variant: "outline"
+        }}
+      />
     )
   }
 
   if (clients.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <p className="text-muted-foreground">No clients found</p>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Add First Client
-        </Button>
-      </div>
+      <EmptyState
+        icon={<Plus className="w-8 h-8" />}
+        title="No Clients Found"
+        description="Get started by adding your first client to begin managing transactions and rates."
+        action={{
+          label: "Add First Client",
+          onClick: () => setIsAddClientFormOpen(true)
+        }}
+      />
     )
   }
 
@@ -229,40 +246,48 @@ export function ClientDashboard() {
                 </div>
 
                 {/* KPI Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
-                  <KPICard
-                    title="Total Received"
-                    value={kpis?.totalReceived || 0}
-                    icon={<Package className="w-4 h-4 lg:w-5 lg:h-5" />}
-                    suffix=" units"
-                    color="blue"
-                    compact={true}
-                  />
-                  <KPICard
-                    title="Total Delivered"
-                    value={kpis?.totalDelivered || 0}
-                    icon={<Truck className="w-4 h-4 lg:w-5 lg:h-5" />}
-                    suffix=" units"
-                    color="green"
-                    compact={true}
-                  />
-                  <KPICard
-                    title="Current Balance"
-                    value={kpis?.currentBalance || 0}
-                    icon={<Scale className="w-4 h-4 lg:w-5 lg:h-5" />}
-                    suffix=" units"
-                    color={(kpis?.currentBalance || 0) < 0 ? 'red' : 'orange'}
-                    compact={true}
-                  />
-                  <KPICard
-                    title="Total Billed"
-                    value={kpis?.totalBilled || 0}
-                    icon={<DollarSign className="w-4 h-4 lg:w-5 lg:h-5" />}
-                    prefix="₹"
-                    color="purple"
-                    compact={true}
-                  />
-                </div>
+                {kpisLoading ? (
+                  <CardLoading count={4} />
+                ) : kpisError ? (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                    <p className="text-red-600 text-sm">Failed to load KPI data</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+                    <KPICard
+                      title="Total Received"
+                      value={kpis?.totalReceived || 0}
+                      icon={<Package className="w-4 h-4 lg:w-5 lg:h-5" />}
+                      suffix=" units"
+                      color="blue"
+                      compact={true}
+                    />
+                    <KPICard
+                      title="Total Delivered"
+                      value={kpis?.totalDelivered || 0}
+                      icon={<Truck className="w-4 h-4 lg:w-5 lg:h-5" />}
+                      suffix=" units"
+                      color="green"
+                      compact={true}
+                    />
+                    <KPICard
+                      title="Current Balance"
+                      value={kpis?.currentBalance || 0}
+                      icon={<Scale className="w-4 h-4 lg:w-5 lg:h-5" />}
+                      suffix=" units"
+                      color={(kpis?.currentBalance || 0) < 0 ? 'red' : 'orange'}
+                      compact={true}
+                    />
+                    <KPICard
+                      title="Total Billed"
+                      value={kpis?.totalBilled || 0}
+                      icon={<DollarSign className="w-4 h-4 lg:w-5 lg:h-5" />}
+                      prefix="₹"
+                      color="purple"
+                      compact={true}
+                    />
+                  </div>
+                )}
 
                 {/* Balance Summary */}
                 <div className="space-y-6">
@@ -271,7 +296,24 @@ export function ClientDashboard() {
                     <h3 className="text-xl font-bold text-gray-900">Balance Summary</h3>
                     <div className="flex-1 h-px bg-gray-200"></div>
                   </div>
-                  <BalanceSummaryTable data={balanceSummary} />
+                  {balanceLoading ? (
+                    <LoadingState message="Loading balance summary..." />
+                  ) : balanceError ? (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                      <p className="text-red-600 text-sm">Failed to load balance summary</p>
+                    </div>
+                  ) : balanceSummary.length === 0 ? (
+                    <TableEmptyState
+                      title="No Balance Data"
+                      description="Balance summary will appear here once transactions are added."
+                      action={{
+                        label: "Add Transaction",
+                        onClick: () => setIsTransactionFormOpen(true)
+                      }}
+                    />
+                  ) : (
+                    <BalanceSummaryTable data={balanceSummary} />
+                  )}
                 </div>
 
                 {/* Transaction Log */}
@@ -290,11 +332,28 @@ export function ClientDashboard() {
                       Add Transaction
                     </Button>
                   </div>
-                  <TransactionLogTable 
-                    data={transactions} 
-                    onEdit={handleEditTransaction}
-                    onDelete={handleDeleteTransaction}
-                  />
+                  {transactionsLoading ? (
+                    <LoadingState message="Loading transactions..." />
+                  ) : transactionsError ? (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                      <p className="text-red-600 text-sm">Failed to load transactions</p>
+                    </div>
+                  ) : transactions.length === 0 ? (
+                    <TableEmptyState
+                      title="No Transactions Yet"
+                      description="Start by adding your first transaction for this client."
+                      action={{
+                        label: "Add First Transaction",
+                        onClick: () => setIsTransactionFormOpen(true)
+                      }}
+                    />
+                  ) : (
+                    <TransactionLogTable 
+                      data={transactions} 
+                      onEdit={handleEditTransaction}
+                      onDelete={handleDeleteTransaction}
+                    />
+                  )}
                 </div>
               </motion.div>
             </TabsContent>

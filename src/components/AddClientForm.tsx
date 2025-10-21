@@ -14,6 +14,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { useCreateClient } from '../hooks/useClients'
+import { handleError, showSuccessToast } from '../lib/errorHandling'
 
 const clientSchema = z.object({
   name: z.string().min(1, 'Company name is required'),
@@ -46,8 +47,9 @@ export function AddClientForm({ open, onOpenChange }: AddClientFormProps) {
       })
       onOpenChange(false)
       form.reset()
+      showSuccessToast(`Client "${data.name}" created successfully`)
     } catch (error) {
-      console.error('Failed to create client:', error)
+      handleError(error, 'creating client')
     }
   }
 
