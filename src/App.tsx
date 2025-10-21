@@ -92,7 +92,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b bg-gradient-to-r from-slate-50 to-blue-50 shadow-sm">
-        <div className="container mx-auto px-4 py-3 lg:py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-3 lg:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-3">
               <div className="w-7 h-7 lg:w-8 lg:h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
@@ -108,7 +108,7 @@ function AppContent() {
         </div>
       </header>
 
-      <main className="container mx-auto px-2 lg:px-4 py-4 lg:py-6 min-h-[calc(100vh-120px)] lg:min-h-[calc(100vh-140px)]">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-4 py-4 lg:py-6 min-h-[calc(100vh-120px)] lg:min-h-[calc(100vh-140px)]">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<ClientDashboard />} />
@@ -118,7 +118,7 @@ function AppContent() {
       </main>
 
       <footer className="border-t bg-gradient-to-r from-slate-50 to-blue-50 mt-auto">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-center">
             <p className="text-sm text-gray-600">
               Made with{' '}

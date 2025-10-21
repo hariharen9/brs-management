@@ -278,7 +278,7 @@ export function GlobalSearch({ open, onOpenChange, onResultSelect }: GlobalSearc
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] p-0 gap-0 shadow-2xl border-0">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-[600px] p-0 gap-0 shadow-2xl border-0">
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="flex items-center space-x-2">
             <Search className="w-5 h-5 text-blue-600" />
@@ -287,7 +287,7 @@ export function GlobalSearch({ open, onOpenChange, onResultSelect }: GlobalSearc
         </DialogHeader>
 
         {/* Search Input */}
-        <div className="px-6 py-4 border-b bg-gray-50 space-y-4">
+        <div className="px-4 sm:px-6 py-4 border-b bg-gray-50 space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
@@ -310,7 +310,7 @@ export function GlobalSearch({ open, onOpenChange, onResultSelect }: GlobalSearc
           </div>
 
           {/* Filter Buttons */}
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             {[
               { key: 'all', label: 'All', icon: Search },
               { key: 'clients', label: 'Clients', icon: User },
@@ -339,7 +339,7 @@ export function GlobalSearch({ open, onOpenChange, onResultSelect }: GlobalSearc
         <div className="max-h-96 overflow-y-auto">
           <AnimatePresence>
             {!query && searchResults.length > 0 && (
-              <div className="px-6 py-3 border-b bg-gray-50">
+              <div className="px-4 sm:px-6 py-3 border-b bg-gray-50">
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                   Quick Access
                 </p>
@@ -351,7 +351,7 @@ export function GlobalSearch({ open, onOpenChange, onResultSelect }: GlobalSearc
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="px-6 py-8 text-center text-gray-500"
+                className="px-4 sm:px-6 py-8 text-center text-gray-500"
               >
                 <Search className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                 <p>No results found for "{query}"</p>
@@ -366,7 +366,7 @@ export function GlobalSearch({ open, onOpenChange, onResultSelect }: GlobalSearc
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ delay: index * 0.05 }}
-                className={`px-6 py-4 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
+                className={`px-4 sm:px-6 py-4 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 ${
                   index === selectedIndex ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'
                 }`}
                 onClick={() => handleResultClick(result)}
@@ -425,7 +425,7 @@ export function GlobalSearch({ open, onOpenChange, onResultSelect }: GlobalSearc
 
         {/* Footer */}
         {query && searchResults.length > 0 && (
-          <div className="px-6 py-3 bg-gray-50 border-t text-xs text-gray-500 flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-3 bg-gray-50 border-t text-xs text-gray-500 flex items-center justify-between">
             <span>Use ↑↓ to navigate, Enter to select, Esc to close</span>
             <span>{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</span>
           </div>

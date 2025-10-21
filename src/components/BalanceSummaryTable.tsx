@@ -27,7 +27,8 @@ export function BalanceSummaryTable({ data }: BalanceSummaryTableProps) {
 
   return (
     <Card>
-      <Table>
+      <div className="mobile-table-scroll">
+        <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Component</TableHead>
@@ -59,6 +60,7 @@ export function BalanceSummaryTable({ data }: BalanceSummaryTableProps) {
           ))}
         </TableBody>
       </Table>
+      </div>
     </Card>
   )
 }

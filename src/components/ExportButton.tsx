@@ -19,10 +19,10 @@ export function ExportButton({
       variant={variant}
       size={size}
       onClick={onClick}
-      className={`flex items-center space-x-2 ${className}`}
+      className={`flex items-center space-x-1 sm:space-x-2 ${className}`}
     >
-      <Download className="w-4 h-4" />
-      <span>Export</span>
+      <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+      <span className="text-xs sm:text-sm">Export</span>
     </Button>
   )
 }

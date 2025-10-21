@@ -173,12 +173,12 @@ export function ClientDashboard() {
   return (
     <div className="space-y-6">
       {/* Dashboard Header with Search and Export */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Manage your clients and transactions</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage your clients and transactions</p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <ExportButton onClick={() => setIsExportDialogOpen(true)} />
           <SearchTrigger onClick={() => setIsSearchOpen(true)} />
         </div>
@@ -262,31 +262,25 @@ export function ClientDashboard() {
                 className="space-y-8"
               >
                 {/* Client Header */}
-                <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 rounded-xl p-8 text-white shadow-xl border border-blue-500/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                        <span className="text-2xl font-bold text-white">
+                <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 rounded-xl p-4 sm:p-6 lg:p-8 text-white shadow-xl border border-blue-500/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-center space-x-3 sm:space-x-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm flex-shrink-0">
+                        <span className="text-lg sm:text-2xl font-bold text-white">
                           {client.name.charAt(0)}
                         </span>
                       </div>
-                      <div>
-                        <h2 className="text-3xl font-bold mb-2 flex items-center">
-                          {client.name}
-                          <div className="ml-3 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2 flex items-center">
+                          <span className="truncate">{client.name}</span>
+                          <div className="ml-2 sm:ml-3 w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0"></div>
                         </h2>
                         {client.contact_person && (
-                          <p className="text-blue-100 flex items-center">
-                            <span className="w-2 h-2 bg-blue-300 rounded-full mr-2"></span>
-                            Contact: {client.contact_person}
+                          <p className="text-blue-100 flex items-center text-sm sm:text-base">
+                            <span className="w-2 h-2 bg-blue-300 rounded-full mr-2 flex-shrink-0"></span>
+                            <span className="truncate">Contact: {client.contact_person}</span>
                           </p>
                         )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-blue-100 text-sm">Client ID</div>
-                      <div className="text-white font-mono text-xs bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm">
-                        {client.id.slice(0, 8)}...
                       </div>
                     </div>
                   </div>
@@ -365,32 +359,37 @@ export function ClientDashboard() {
 
                 {/* Transaction Log */}
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-1 h-6 bg-green-600 rounded-full"></div>
-                      <h3 className="text-xl font-bold text-gray-900">Transaction History</h3>
-                      <div className="flex-1 h-px bg-gray-200"></div>
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900">Transaction History</h3>
+                      <div className="hidden sm:block flex-1 h-px bg-gray-200"></div>
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                       <Button
                         variant="outline"
+                        size="sm"
                         onClick={() => setIsBillingModalOpen(true)}
-                        className="bg-white hover:bg-gray-50 border-green-200 text-green-700 hover:text-green-800"
+                        className="bg-white hover:bg-gray-50 border-green-200 text-green-700 hover:text-green-800 text-xs sm:text-sm"
                       >
-                        <DollarSign className="w-4 h-4 mr-2" />
-                        Billing
+                        <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <span className="hidden xs:inline">Billing</span>
+                        <span className="xs:hidden">Billing</span>
                       </Button>
                       <ExportButton 
                         onClick={() => setIsExportDialogOpen(true)}
                         variant="outline"
-                        className="bg-white hover:bg-gray-50"
+                        size="sm"
+                        className="bg-white hover:bg-gray-50 text-xs sm:text-sm"
                       />
                       <Button 
                         onClick={() => setIsTransactionFormOpen(true)}
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                        size="sm"
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 text-xs sm:text-sm"
                       >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Transaction
+                        <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <span className="hidden xs:inline">Add Transaction</span>
+                        <span className="xs:hidden">Add</span>
                       </Button>
                     </div>
                   </div>

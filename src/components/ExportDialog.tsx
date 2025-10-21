@@ -135,22 +135,23 @@ export function ExportDialog({ open, onOpenChange, defaultClientId }: ExportDial
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto shadow-2xl border-0">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Download className="w-5 h-5 text-blue-600" />
-            <span>Export Reports</span>
-          </DialogTitle>
-          <DialogDescription>
-            Generate and download comprehensive reports in various formats
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-[600px] max-h-[90vh] shadow-2xl border-0 p-0">
+        <div className="p-4 sm:p-6 lg:p-8 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="flex items-center space-x-2">
+              <Download className="w-5 h-5 text-blue-600" />
+              <span>Export Reports</span>
+            </DialogTitle>
+            <DialogDescription>
+              Generate and download comprehensive reports in various formats
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-6">
+          <div className="space-y-6">
           {/* Format Selection */}
           <div className="space-y-3">
             <Label className="text-sm font-medium">Export Format</Label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {[
                 { key: 'xlsx', label: 'Excel', badge: 'Recommended' },
                 { key: 'csv', label: 'CSV', badge: 'Simple' },
@@ -309,7 +310,7 @@ export function ExportDialog({ open, onOpenChange, defaultClientId }: ExportDial
               <Calendar className="w-4 h-4" />
               <span>Date Range (Optional)</span>
             </Label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs text-gray-600">From Date</Label>
                 <Input
@@ -417,6 +418,7 @@ export function ExportDialog({ open, onOpenChange, defaultClientId }: ExportDial
             )}
           </Button>
         </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )

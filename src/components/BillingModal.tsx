@@ -159,25 +159,26 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto shadow-2xl border-0">
-        <DialogHeader className="border-b pb-4">
-          <DialogTitle className="flex items-center space-x-3">
-            <Receipt className="w-6 h-6 text-blue-600" />
-            <span>BRS Industries Bill - {client.name}</span>
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl lg:max-w-6xl max-h-[90vh] shadow-2xl border-0 p-0">
+        <div className="p-4 sm:p-6 lg:p-8 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="border-b pb-4 mb-6">
+            <DialogTitle className="flex items-center space-x-3">
+              <Receipt className="w-6 h-6 text-blue-600" />
+              <span>BRS Industries Bill - {client.name}</span>
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="space-y-6">
+          <div className="space-y-6">
           {/* Period Selection */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-gray-600" />
                 <span className="text-sm font-medium">Period:</span>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                 {[
-                  { key: 'current-month', label: 'Current Month' },
+                  { key: 'current-month', label: 'Current' },
                   { key: 'last-month', label: 'Last Month' },
                   { key: 'custom', label: 'Custom' }
                 ].map(({ key, label }) => (
@@ -195,50 +196,46 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
             </div>
             <div className="flex space-x-2">
               <Button variant="outline" size="sm" onClick={handlePrint}>
-                <Printer className="w-4 h-4 mr-2" />
-                Print
+                <Printer className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Print</span>
               </Button>
-              {/* <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="w-4 h-4 mr-2" />
-                Download PDF
-              </Button> */}
             </div>
           </div>
 
           {/* Billing Header */}
           <Card className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">BILLING STATEMENT</h2>
-                  <div className="space-y-1 text-blue-100">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2">BILLING STATEMENT</h2>
+                  <div className="space-y-1 text-blue-100 text-sm sm:text-base">
                     <div className="flex items-center space-x-2">
-                      <User className="w-4 h-4" />
-                      <span>Client: {client.name}</span>
+                      <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate">Client: {client.name}</span>
                     </div>
                     {client.contact_person && (
                       <div className="flex items-center space-x-2">
-                        <span className="w-4 h-4 flex items-center justify-center">•</span>
-                        <span>Contact: {client.contact_person}</span>
+                        <span className="w-3 h-3 sm:w-4 sm:h-4 flex items-center justify-center flex-shrink-0">•</span>
+                        <span className="truncate">Contact: {client.contact_person}</span>
                       </div>
                     )}
                     <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>Period: {getPeriodLabel()}</span>
+                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate">Period: {getPeriodLabel()}</span>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-blue-100 text-sm">Total Amount</div>
-                  <div className="text-3xl font-bold">{formatCurrency(billingSummary.totalAmount)}</div>
-                  <div className="text-blue-200 text-sm">{billingSummary.transactionCount} transactions</div>
+                <div className="text-left sm:text-right flex-shrink-0">
+                  <div className="text-blue-100 text-xs sm:text-sm">Total Amount</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{formatCurrency(billingSummary.totalAmount)}</div>
+                  <div className="text-blue-200 text-xs sm:text-sm">{billingSummary.transactionCount} transactions</div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center space-x-3">
@@ -305,7 +302,8 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
+              <div className="mobile-table-scroll">
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Component</TableHead>
@@ -331,6 +329,7 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </CardContent>
           </Card>
 
@@ -349,7 +348,8 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
                   <p>No billable transactions found for the selected period</p>
                 </div>
               ) : (
-                <Table>
+                <div className="mobile-table-scroll">
+                  <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Date</TableHead>
@@ -394,6 +394,7 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
                     ))}
                   </TableBody>
                 </Table>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -415,6 +416,7 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

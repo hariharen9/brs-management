@@ -210,3 +210,52 @@
     display: none;
   }
 }
+
+/* Mobile-specific improvements */
+@layer components {
+  /* Ensure modals don't overflow on mobile */
+  [data-radix-dialog-content] {
+    max-width: calc(100vw - 2rem) !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Better mobile table handling */
+  .mobile-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Mobile button improvements */
+  @media (max-width: 640px) {
+    .mobile-btn-compact {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      line-height: 1rem;
+    }
+    
+    .mobile-btn-icon {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+  }
+  
+  /* Extra small breakpoint utilities */
+  @media (max-width: 475px) {
+    .xs\:hidden {
+      display: none;
+    }
+    
+    .xs\:inline {
+      display: inline;
+    }
+    
+    .xs\:block {
+      display: block;
+    }
+    
+    .xs\:flex {
+      display: flex;
+    }
+  }
+}
