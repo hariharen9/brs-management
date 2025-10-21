@@ -24,7 +24,7 @@ export class ExcelTemplateAnalyzer {
       const template: ExcelTemplate = {
         sheets: [],
         workbookProperties: workbook.Props,
-        styles: workbook.Styles
+        styles: (workbook as any).Styles
       }
 
       // Analyze each sheet
@@ -36,7 +36,7 @@ export class ExcelTemplateAnalyzer {
           data: XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false }),
           merges: worksheet['!merges'],
           colWidths: worksheet['!cols']?.map(col => col.width || 10),
-          rowHeights: worksheet['!rows']?.map(row => row.height || 15)
+          rowHeights: worksheet['!rows']?.map(row => (row as any).height || 15)
         }
         
         template.sheets.push(sheetTemplate)

@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from './ui/button'
 
@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
               We encountered an unexpected error. Please try refreshing the page or contact support if the problem persists.
             </p>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left">
                 <p className="text-sm font-medium text-red-800 mb-2">Error Details:</p>
                 <p className="text-xs text-red-700 font-mono break-all">

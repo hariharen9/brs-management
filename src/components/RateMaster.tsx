@@ -4,7 +4,7 @@ import { Plus, Edit, Trash2, Save, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { ConfirmationDialog } from './ConfirmationDialog'
-import { LoadingState, TableLoading } from './ui/loading'
+import { LoadingState } from './ui/loading'
 import { EmptyState, TableEmptyState } from './ui/empty-state'
 import {
   Select,
@@ -42,7 +42,7 @@ export function RateMaster() {
   const [isDeleteRateDialogOpen, setIsDeleteRateDialogOpen] = useState(false)
   
   const queryClient = useQueryClient()
-  const { data: clients = [], error: clientsError } = useClients()
+  const { data: clients = [] } = useClients()
   const { data: rates = [], isLoading, error: ratesError } = useQuery({
     queryKey: ['rates'],
     queryFn: ratesService.getAll,
