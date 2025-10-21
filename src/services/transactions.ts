@@ -2,6 +2,16 @@ import { supabase } from '../lib/supabase'
 import type { Transaction, ClientKPIs, BalanceSummaryItem } from '../types'
 
 export const transactionsService = {
+  async getAll(): Promise<Transaction[]> {
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .order('date', { ascending: false })
+    
+    if (error) throw error
+    return data || []
+  },
+
   async getByClientId(clientId: string): Promise<Transaction[]> {
     const { data, error } = await supabase
       .from('transactions')

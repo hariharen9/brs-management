@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Package, Truck, Scale, DollarSign, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
@@ -18,6 +18,8 @@ import { DeleteClientDialog } from './DeleteClientDialog'
 import { ConfirmationDialog } from './ConfirmationDialog'
 import { LoadingState, CardLoading } from './ui/loading'
 import { EmptyState, TableEmptyState } from './ui/empty-state'
+import { GlobalSearch } from './GlobalSearch'
+import { SearchTrigger } from './SearchTrigger'
 import { useClients } from '../hooks/useClients'
 import { useClientKPIs, useBalanceSummary, useTransactions, useDeleteTransaction } from '../hooks/useTransactions'
 import type { Transaction, Client } from '../types'
@@ -35,6 +37,7 @@ export function ClientDashboard() {
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null)
   const [isDeleteTransactionDialogOpen, setIsDeleteTransactionDialogOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const { data: clients = [], isLoading: clientsLoading, error: clientsError } = useClients()
   
   // Set first client as active if none selected
@@ -48,6 +51,33 @@ export function ClientDashboard() {
   const deleteTransaction = useDeleteTransaction()
 
   const activeClient = clients.find(c => c.id === activeClientId)
+
+  // Keyboard shortcut for search (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setIsSearchOpen(true)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  const handleSearchResultSelect = (result: any) => {
+    if (result.type === 'client' && result.clientId) {
+      setActiveClientId(result.clientId)
+      showSuccessToast(`Switched to ${result.title}`)
+    } else if (result.type === 'transaction' && result.clientId) {
+      setActiveClientId(result.clientId)
+      showSuccessToast(`Found transaction in ${result.metadata?.clientName || 'client'}`)
+    } else if (result.type === 'component') {
+      // For components, we could show all transactions with that component
+      // For now, just show a success message
+      showSuccessToast(`Found component: ${result.title}`)
+    }
+  }
 
   const handleEditTransaction = (transaction: Transaction) => {
     setEditingTransaction(transaction)
@@ -137,6 +167,15 @@ export function ClientDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Dashboard Header with Search */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600">Manage your clients and transactions</p>
+        </div>
+        <SearchTrigger onClick={() => setIsSearchOpen(true)} />
+      </div>
+
       <Tabs value={activeClientId} onValueChange={setActiveClientId} className="w-full">
         <div className="border-b border-border bg-gradient-to-r from-gray-50 to-slate-50">
           <TabsList className="h-auto bg-transparent p-0 w-full justify-start">
@@ -426,6 +465,13 @@ export function ClientDashboard() {
         variant="destructive"
         onConfirm={confirmDeleteTransaction}
         isLoading={deleteTransaction.isPending}
+      />
+
+      {/* Global Search */}
+      <GlobalSearch
+        open={isSearchOpen}
+        onOpenChange={setIsSearchOpen}
+        onResultSelect={handleSearchResultSelect}
       />
     </div>
   )

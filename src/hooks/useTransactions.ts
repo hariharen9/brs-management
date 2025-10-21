@@ -10,6 +10,13 @@ export function useTransactions(clientId: string) {
   })
 }
 
+export function useAllTransactions() {
+  return useQuery({
+    queryKey: ['all-transactions'],
+    queryFn: () => transactionsService.getAll(),
+  })
+}
+
 export function useClientKPIs(clientId: string) {
   return useQuery({
     queryKey: ['client-kpis', clientId],
