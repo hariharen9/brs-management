@@ -87,20 +87,38 @@ export const ratesService = {
   },
 
   async getUniqueComponents(clientId?: string): Promise<string[]> {
-    let query = supabase
+    // Get components from rates
+    let ratesQuery = supabase
       .from('rates')
       .select('component')
     
     if (clientId) {
-      query = query.or(`client_id.eq.${clientId},client_id.is.null`)
+      ratesQuery = ratesQuery.or(`client_id.eq.${clientId},client_id.is.null`)
     }
     
-    const { data, error } = await query
+    const { data: ratesData, error: ratesError } = await ratesQuery
     
-    if (error) throw error
+    if (ratesError) throw ratesError
     
-    // Get unique component names
-    const uniqueComponents = [...new Set((data || []).map(rate => rate.component))]
+    // Get components from transactions
+    let transactionsQuery = supabase
+      .from('transactions')
+      .select('component')
+    
+    if (clientId) {
+      transactionsQuery = transactionsQuery.eq('client_id', clientId)
+    }
+    
+    const { data: transactionsData, error: transactionsError } = await transactionsQuery
+    
+    if (transactionsError) throw transactionsError
+    
+    // Combine and get unique component names
+    const rateComponents = (ratesData || []).map(rate => rate.component)
+    const transactionComponents = (transactionsData || []).map(transaction => transaction.component)
+    const allComponents = [...rateComponents, ...transactionComponents]
+    const uniqueComponents = [...new Set(allComponents)].filter(Boolean)
+    
     return uniqueComponents.sort()
   }
 }

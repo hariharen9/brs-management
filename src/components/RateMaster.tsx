@@ -26,7 +26,7 @@ import { Badge } from './ui/badge'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ratesService } from '../services/rates'
 import { useClients } from '../hooks/useClients'
-import { useUniqueComponents } from '../hooks/useRates'
+import { useAllUniqueComponents } from '../hooks/useRates'
 import { handleError, showSuccessToast } from '../lib/errorHandling'
 import type { Rate, WorkType, Unit } from '../types'
 
@@ -47,7 +47,7 @@ export function RateMaster() {
     queryKey: ['rates'],
     queryFn: ratesService.getAll,
   })
-  const { data: uniqueComponents = [] } = useUniqueComponents()
+  const { data: uniqueComponents = [] } = useAllUniqueComponents()
 
   const createRateMutation = useMutation({
     mutationFn: ratesService.create,
