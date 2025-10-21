@@ -371,12 +371,12 @@ export class ExportService {
 
     switch (options.reportType) {
       case 'summary':
-        const summaryResult = this.createSummaryCSV(data, options)
+        const summaryResult = this.createSummaryCSV(data)
         csvContent = summaryResult.content
         filename = summaryResult.filename
         break
       case 'detailed':
-        const detailedResult = this.createDetailedCSV(data, options)
+        const detailedResult = this.createDetailedCSV(data)
         csvContent = detailedResult.content
         filename = detailedResult.filename
         break
@@ -386,7 +386,7 @@ export class ExportService {
         filename = transactionResult.filename
         break
       case 'components':
-        const componentResult = this.createComponentsCSV(data, options)
+        const componentResult = this.createComponentsCSV(data)
         csvContent = componentResult.content
         filename = componentResult.filename
         break
@@ -464,7 +464,7 @@ export class ExportService {
     return { content: csvContent, filename }
   }
 
-  private static createSummaryCSV(data: ExportData, options: ExportOptions): { content: string, filename: string } {
+  private static createSummaryCSV(data: ExportData): { content: string, filename: string } {
     const headers = [
       'Client Name', 'Contact Person', 'Total Transactions', 'Total Received', 
       'Total Delivered', 'Current Balance', 'Total Billed'
@@ -503,7 +503,7 @@ export class ExportService {
     return { content: csvContent, filename }
   }
 
-  private static createDetailedCSV(data: ExportData, options: ExportOptions): { content: string, filename: string } {
+  private static createDetailedCSV(data: ExportData): { content: string, filename: string } {
     // For detailed CSV, we'll combine multiple data types
     let csvContent = ''
     
@@ -539,7 +539,7 @@ export class ExportService {
     return { content: csvContent, filename }
   }
 
-  private static createComponentsCSV(data: ExportData, options: ExportOptions): { content: string, filename: string } {
+  private static createComponentsCSV(data: ExportData): { content: string, filename: string } {
     // Analyze components
     const componentAnalysis = new Map<string, {
       totalTransactions: number
@@ -668,16 +668,16 @@ export class ExportService {
 
     switch (options.reportType) {
       case 'summary':
-        this.createSummaryPDF(doc, data, options)
+        this.createSummaryPDF(doc, data)
         break
       case 'detailed':
-        this.createDetailedPDF(doc, data, options)
+        this.createDetailedPDF(doc, data)
         break
       case 'transactions':
         this.createTransactionsPDF(doc, data, options)
         break
       case 'components':
-        this.createComponentsPDF(doc, data, options)
+        this.createComponentsPDF(doc, data)
         break
       case 'balance':
         this.createBalancePDF(doc, data, options)
@@ -699,7 +699,7 @@ export class ExportService {
     doc.save(filename)
   }
 
-  private static createSummaryPDF(doc: jsPDF, data: ExportData, options: ExportOptions) {
+  private static createSummaryPDF(doc: jsPDF, data: ExportData) {
     // Header
     doc.setFontSize(18)
     doc.text('BRS MANAGEMENT SYSTEM', 20, 20)
@@ -786,7 +786,7 @@ export class ExportService {
     }
   }
 
-  private static createDetailedPDF(doc: jsPDF, data: ExportData, options: ExportOptions) {
+  private static createDetailedPDF(doc: jsPDF, data: ExportData) {
     // Header
     doc.setFontSize(18)
     doc.text('BRS MANAGEMENT SYSTEM', 20, 20)
@@ -852,7 +852,7 @@ export class ExportService {
     }
   }
 
-  private static createComponentsPDF(doc: jsPDF, data: ExportData, options: ExportOptions) {
+  private static createComponentsPDF(doc: jsPDF, data: ExportData) {
     // Analyze components
     const componentAnalysis = new Map<string, {
       totalTransactions: number

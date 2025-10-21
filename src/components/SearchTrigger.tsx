@@ -1,4 +1,4 @@
-import { Search, Command } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { Button } from './ui/button'
 
 interface SearchTriggerProps {

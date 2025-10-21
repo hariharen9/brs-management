@@ -4,14 +4,14 @@ import { Button } from './ui/button'
 interface ExportButtonProps {
   onClick: () => void
   variant?: 'default' | 'outline' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'default' | 'lg'
   className?: string
 }
 
 export function ExportButton({ 
   onClick, 
   variant = 'outline', 
-  size = 'sm',
+  size = 'default',
   className = '' 
 }: ExportButtonProps) {
   return (
