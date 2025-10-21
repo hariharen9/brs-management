@@ -101,3 +101,14 @@
     background: rgba(0, 0, 0, 0.6) !important;
   }
 }
+
+/* Hide scrollbar for client tabs on mobile */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
