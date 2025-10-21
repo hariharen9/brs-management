@@ -15,6 +15,7 @@ export interface Transaction {
   transaction_type: 'Received' | 'Delivered'
   qty_in: number | null
   qty_out: number | null
+  weight_kg: number | null
   work_type: 'Fettling' | 'Shot Blasting' | 'Both' | null
   unit: 'Per Piece' | 'Per Kg' | null
   rate_applied: number | null

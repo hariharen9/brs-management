@@ -66,8 +66,15 @@ export function useDeleteRate() {
 
 export function useUniqueComponents(clientId?: string) {
   return useQuery({
-    queryKey: ['unique-components', clientId],
+    queryKey: ['unique-components', clientId || 'all'],
     queryFn: () => ratesService.getUniqueComponents(clientId),
-    enabled: !!clientId,
+    // Always enabled - if no clientId, get all components
+  })
+}
+
+export function useAllUniqueComponents() {
+  return useQuery({
+    queryKey: ['unique-components', 'all'],
+    queryFn: () => ratesService.getUniqueComponents(),
   })
 }

@@ -22,6 +22,7 @@ import { GlobalSearch } from './GlobalSearch'
 import { SearchTrigger } from './SearchTrigger'
 import { ExportDialog } from './ExportDialog'
 import { ExportButton } from './ExportButton'
+import { BillingModal } from './BillingModal'
 import { useClients } from '../hooks/useClients'
 import { useClientKPIs, useBalanceSummary, useTransactions, useDeleteTransaction } from '../hooks/useTransactions'
 import type { Transaction, Client } from '../types'
@@ -41,6 +42,7 @@ export function ClientDashboard() {
   const [isDeleteTransactionDialogOpen, setIsDeleteTransactionDialogOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
+  const [isBillingModalOpen, setIsBillingModalOpen] = useState(false)
   const { data: clients = [], isLoading: clientsLoading, error: clientsError } = useClients()
   
   // Set first client as active if none selected
@@ -370,6 +372,14 @@ export function ClientDashboard() {
                       <div className="flex-1 h-px bg-gray-200"></div>
                     </div>
                     <div className="flex items-center space-x-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsBillingModalOpen(true)}
+                        className="bg-white hover:bg-gray-50 border-green-200 text-green-700 hover:text-green-800"
+                      >
+                        <DollarSign className="w-4 h-4 mr-2" />
+                        Billing
+                      </Button>
                       <ExportButton 
                         onClick={() => setIsExportDialogOpen(true)}
                         variant="outline"
@@ -493,6 +503,15 @@ export function ClientDashboard() {
         onOpenChange={setIsExportDialogOpen}
         defaultClientId={activeClientId}
       />
+
+      {/* Billing Modal */}
+      {activeClientId && (
+        <BillingModal
+          open={isBillingModalOpen}
+          onOpenChange={setIsBillingModalOpen}
+          clientId={activeClientId}
+        />
+      )}
     </div>
   )
 }

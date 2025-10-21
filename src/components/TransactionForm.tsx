@@ -37,6 +37,7 @@ const transactionSchema = z.object({
   transaction_type: z.enum(['Received', 'Delivered']),
   qty_in: z.number().nullable(),
   qty_out: z.number().nullable(),
+  weight_kg: z.number().nullable(),
   work_type: z.enum(['Fettling', 'Shot Blasting', 'Both']).nullable(),
   unit: z.enum(['Per Piece', 'Per Kg']).nullable(),
   rate_applied: z.number().nullable(),
@@ -73,6 +74,7 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
       transaction_type: 'Received',
       qty_in: null,
       qty_out: null,
+      weight_kg: null,
       work_type: null,
       unit: null,
       rate_applied: null,
@@ -93,6 +95,7 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
         transaction_type: editingTransaction.transaction_type,
         qty_in: editingTransaction.qty_in,
         qty_out: editingTransaction.qty_out || editingTransaction.qty_in, // Use qty_out for display, fallback to qty_in
+        weight_kg: editingTransaction.weight_kg,
         work_type: editingTransaction.work_type,
         unit: editingTransaction.unit,
         rate_applied: editingTransaction.rate_applied,
@@ -115,6 +118,7 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
         transaction_type: 'Received',
         qty_in: null,
         qty_out: null,
+        weight_kg: null,
         work_type: null,
         unit: null,
         rate_applied: null,
@@ -362,6 +366,19 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
               step="0.01"
               placeholder="Enter quantity"
               {...form.register('qty_out', { 
+                setValueAs: (value) => value === '' ? null : parseFloat(value) 
+              })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="weight">Weight (KG)</Label>
+            <Input
+              id="weight"
+              type="number"
+              step="0.001"
+              placeholder="Enter weight in kilograms"
+              {...form.register('weight_kg', { 
                 setValueAs: (value) => value === '' ? null : parseFloat(value) 
               })}
             />

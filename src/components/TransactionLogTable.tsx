@@ -48,6 +48,7 @@ export function TransactionLogTable({ data, onEdit, onDelete }: TransactionLogTa
             <TableHead>Type</TableHead>
             <TableHead className="text-right">Qty In</TableHead>
             <TableHead className="text-right">Qty Out</TableHead>
+            <TableHead className="text-right">Weight (KG)</TableHead>
             <TableHead>Work Type</TableHead>
             <TableHead className="text-right">Rate</TableHead>
             <TableHead className="text-right">Billed Amount</TableHead>
@@ -79,6 +80,9 @@ export function TransactionLogTable({ data, onEdit, onDelete }: TransactionLogTa
               </TableCell>
               <TableCell className="text-right">
                 {transaction.qty_out ? transaction.qty_out.toLocaleString() : '-'}
+              </TableCell>
+              <TableCell className="text-right">
+                {transaction.weight_kg ? `${transaction.weight_kg.toLocaleString()} kg` : '-'}
               </TableCell>
               <TableCell>
                 {transaction.work_type || '-'}
