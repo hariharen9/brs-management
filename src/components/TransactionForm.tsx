@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from './ui/select'
 import { useCreateTransaction, useUpdateTransaction } from '../hooks/useTransactions'
+import { useUniqueComponents } from '../hooks/useRates'
 import { ratesService } from '../services/rates'
 import type { Transaction, TransactionType, WorkType, Unit } from '../types'
 
@@ -53,8 +54,10 @@ interface TransactionFormProps {
 
 export function TransactionForm({ open, onOpenChange, clientId, clientName, editingTransaction }: TransactionFormProps) {
   const [isLoadingRate, setIsLoadingRate] = useState(false)
+  const [customComponent, setCustomComponent] = useState('')
   const createTransaction = useCreateTransaction()
   const updateTransaction = useUpdateTransaction()
+  const { data: uniqueComponents = [] } = useUniqueComponents(clientId)
   
   const isEditing = !!editingTransaction
 
@@ -79,11 +82,12 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
   // Reset form when editingTransaction changes
   useEffect(() => {
     if (editingTransaction) {
+      const componentValue = editingTransaction.component
       form.reset({
         client_id: editingTransaction.client_id,
         date: editingTransaction.date,
         dc_no: editingTransaction.dc_no,
-        component: editingTransaction.component,
+        component: componentValue,
         lot_no: editingTransaction.lot_no,
         transaction_type: editingTransaction.transaction_type,
         qty_in: editingTransaction.qty_in,
@@ -93,6 +97,13 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
         rate_applied: editingTransaction.rate_applied,
         billed_amount: editingTransaction.billed_amount,
       })
+      
+      // Set custom component if it's not in the dropdown list
+      if (componentValue && !uniqueComponents.includes(componentValue)) {
+        setCustomComponent(componentValue)
+      } else {
+        setCustomComponent('')
+      }
     } else {
       form.reset({
         client_id: clientId,
@@ -108,8 +119,9 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
         rate_applied: null,
         billed_amount: null,
       })
+      setCustomComponent('')
     }
-  }, [editingTransaction, clientId, form])
+  }, [editingTransaction, clientId, form, uniqueComponents])
 
   const watchedFields = form.watch(['transaction_type', 'component', 'work_type', 'unit', 'qty_out', 'rate_applied'])
   const [transactionType, component, workType, unit, qtyOut, rateApplied] = watchedFields
@@ -249,11 +261,44 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
             <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="component">Component</Label>
-              <Input
-                id="component"
-                placeholder="Enter component name"
-                {...form.register('component')}
-              />
+              <div className="space-y-2">
+                <Select
+                  value={component || 'custom'}
+                  onValueChange={(value) => {
+                    if (value === 'custom') {
+                      form.setValue('component', customComponent)
+                    } else {
+                      form.setValue('component', value)
+                      setCustomComponent('')
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select or enter component" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {uniqueComponents.map((comp) => (
+                      <SelectItem key={comp} value={comp}>
+                        {comp}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="custom">
+                      <span className="text-blue-600">+ Enter custom component</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                {(component === customComponent || !uniqueComponents.includes(component || '')) && (
+                  <Input
+                    placeholder="Enter component name"
+                    value={customComponent || component}
+                    onChange={(e) => {
+                      setCustomComponent(e.target.value)
+                      form.setValue('component', e.target.value)
+                    }}
+                  />
+                )}
+              </div>
               {form.formState.errors.component && (
                 <p className="text-sm text-red-600">{form.formState.errors.component.message}</p>
               )}

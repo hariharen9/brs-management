@@ -112,14 +112,14 @@ export function ClientDashboard() {
   return (
     <div className="space-y-6">
       <Tabs value={activeClientId} onValueChange={setActiveClientId} className="w-full">
-        <div className="border-b border-border">
+        <div className="border-b border-border bg-gradient-to-r from-gray-50 to-slate-50">
           <TabsList className="h-auto bg-transparent p-0 w-full justify-start">
-            <div className="flex items-center space-x-1 overflow-x-auto pb-2 w-full">
+            <div className="flex items-center space-x-1 overflow-x-auto pb-2 pt-2 px-2 w-full">
               {clients.map((client) => (
                 <div key={client.id} className="relative group">
                   <TabsTrigger 
                     value={client.id} 
-                    className="relative px-6 py-3 text-sm font-medium transition-all hover:text-primary data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm border-b-2 border-transparent data-[state=active]:border-primary rounded-t-lg whitespace-nowrap bg-transparent pr-10"
+                    className="relative px-6 py-3 text-sm font-medium transition-all hover:text-primary hover:bg-blue-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-100 data-[state=active]:to-blue-50 data-[state=active]:text-blue-800 data-[state=active]:shadow-md border-b-2 border-transparent data-[state=active]:border-blue-500 rounded-t-lg whitespace-nowrap bg-transparent pr-10"
                   >
                     {client.name}
                   </TabsTrigger>
@@ -186,20 +186,30 @@ export function ClientDashboard() {
                 className="space-y-8"
               >
                 {/* Client Header */}
-                <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-8 text-white shadow-lg">
+                <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 rounded-xl p-8 text-white shadow-xl border border-blue-500/20">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-3xl font-bold mb-2">{client.name}</h2>
-                      {client.contact_person && (
-                        <p className="text-blue-100 flex items-center">
-                          <span className="w-2 h-2 bg-blue-300 rounded-full mr-2"></span>
-                          Contact: {client.contact_person}
-                        </p>
-                      )}
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <span className="text-2xl font-bold text-white">
+                          {client.name.charAt(0)}
+                        </span>
+                      </div>
+                      <div>
+                        <h2 className="text-3xl font-bold mb-2 flex items-center">
+                          {client.name}
+                          <div className="ml-3 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        </h2>
+                        {client.contact_person && (
+                          <p className="text-blue-100 flex items-center">
+                            <span className="w-2 h-2 bg-blue-300 rounded-full mr-2"></span>
+                            Contact: {client.contact_person}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className="text-blue-100 text-sm">Client ID</div>
-                      <div className="text-white font-mono text-xs bg-blue-800/30 px-2 py-1 rounded">
+                      <div className="text-white font-mono text-xs bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm">
                         {client.id.slice(0, 8)}...
                       </div>
                     </div>

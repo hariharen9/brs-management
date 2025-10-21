@@ -63,3 +63,11 @@ export function useDeleteRate() {
     },
   })
 }
+
+export function useUniqueComponents(clientId?: string) {
+  return useQuery({
+    queryKey: ['unique-components', clientId],
+    queryFn: () => ratesService.getUniqueComponents(clientId),
+    enabled: !!clientId,
+  })
+}
