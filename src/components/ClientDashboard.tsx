@@ -275,10 +275,16 @@ export function ClientDashboard() {
                           <span className="truncate">{client.name}</span>
                           <div className="ml-2 sm:ml-3 w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0"></div>
                         </h2>
-                        {client.contact_person && (
+                        {client.gst_number && (
                           <p className="text-blue-100 flex items-center text-sm sm:text-base">
                             <span className="w-2 h-2 bg-blue-300 rounded-full mr-2 flex-shrink-0"></span>
-                            <span className="truncate">Contact: {client.contact_person}</span>
+                            <span className="truncate">GST: {client.gst_number}</span>
+                          </p>
+                        )}
+                        {client.address && (
+                          <p className="text-blue-100 flex items-center text-sm sm:text-base">
+                            <span className="w-2 h-2 bg-blue-300 rounded-full mr-2 flex-shrink-0"></span>
+                            <span className="truncate">Address: {client.address}</span>
                           </p>
                         )}
                       </div>

@@ -18,7 +18,8 @@ import { handleError, showSuccessToast } from '../lib/errorHandling'
 
 const clientSchema = z.object({
   name: z.string().min(1, 'Company name is required'),
-  contact_person: z.string().optional(),
+  gst_number: z.string().optional(),
+  address: z.string().optional(),
 })
 
 type ClientFormData = z.infer<typeof clientSchema>
@@ -35,7 +36,8 @@ export function AddClientForm({ open, onOpenChange }: AddClientFormProps) {
     resolver: zodResolver(clientSchema),
     defaultValues: {
       name: '',
-      contact_person: '',
+      gst_number: '',
+      address: '',
     },
   })
 
@@ -43,7 +45,8 @@ export function AddClientForm({ open, onOpenChange }: AddClientFormProps) {
     try {
       await createClient.mutateAsync({
         name: data.name,
-        contact_person: data.contact_person || null,
+        gst_number: data.gst_number || null,
+        address: data.address || null,
       })
       onOpenChange(false)
       form.reset()
@@ -84,11 +87,20 @@ export function AddClientForm({ open, onOpenChange }: AddClientFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="contact_person">Contact Person</Label>
+            <Label htmlFor="gst_number">GST Number</Label>
             <Input
-              id="contact_person"
-              placeholder="Enter contact person name (optional)"
-              {...form.register('contact_person')}
+              id="gst_number"
+              placeholder="Enter GST number (optional)"
+              {...form.register('gst_number')}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">Company Address</Label>
+            <Input
+              id="address"
+              placeholder="Enter company address (optional)"
+              {...form.register('address')}
             />
           </div>
 

@@ -1,7 +1,8 @@
 export interface Client {
   id: string
   name: string
-  contact_person: string | null
+  gst_number: string | null
+  address: string | null
   created_at: string
 }
 

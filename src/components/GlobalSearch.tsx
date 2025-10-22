@@ -116,7 +116,8 @@ export function GlobalSearch({ open, onOpenChange, onResultSelect }: GlobalSearc
       clients.forEach(client => {
         const clientMatches = 
           client.name.toLowerCase().includes(searchTerm) ||
-          client.contact_person?.toLowerCase().includes(searchTerm) ||
+          client.gst_number?.toLowerCase().includes(searchTerm) ||
+          client.address?.toLowerCase().includes(searchTerm) ||
           client.id.toLowerCase().includes(searchTerm)
 
         if (clientMatches) {
@@ -124,7 +125,7 @@ export function GlobalSearch({ open, onOpenChange, onResultSelect }: GlobalSearc
             id: `client-${client.id}`,
             type: 'client',
             title: client.name,
-            subtitle: client.contact_person || 'No contact person',
+            subtitle: client.gst_number ? `GST: ${client.gst_number}` : (client.address ? `Address: ${client.address}` : 'No additional info'),
             description: `Client ID: ${client.id.slice(0, 8)}...`,
             clientId: client.id
           })

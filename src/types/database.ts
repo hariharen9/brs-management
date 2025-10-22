@@ -13,19 +13,22 @@ export interface Database {
         Row: {
           id: string
           name: string
-          contact_person: string | null
+          gst_number: string | null
+          address: string | null
           created_at: string
         }
         Insert: {
           id?: string
           name: string
-          contact_person?: string | null
+          gst_number?: string | null
+          address?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           name?: string
-          contact_person?: string | null
+          gst_number?: string | null
+          address?: string | null
           created_at?: string
         }
         Relationships: []

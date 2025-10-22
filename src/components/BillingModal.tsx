@@ -213,10 +213,16 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
                       <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                       <span className="truncate">Client: {client.name}</span>
                     </div>
-                    {client.contact_person && (
+                    {client.gst_number && (
                       <div className="flex items-center space-x-2">
                         <span className="w-3 h-3 sm:w-4 sm:h-4 flex items-center justify-center flex-shrink-0">•</span>
-                        <span className="truncate">Contact: {client.contact_person}</span>
+                        <span className="truncate">GST: {client.gst_number}</span>
+                      </div>
+                    )}
+                    {client.address && (
+                      <div className="flex items-center space-x-2">
+                        <span className="w-3 h-3 sm:w-4 sm:h-4 flex items-center justify-center flex-shrink-0">•</span>
+                        <span className="truncate">Address: {client.address}</span>
                       </div>
                     )}
                     <div className="flex items-center space-x-2">

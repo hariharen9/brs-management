@@ -85,7 +85,7 @@ export class ExportService {
     summaryData.push([]) // Empty row
 
     // Client summary
-    summaryData.push(['CLIENT', 'CONTACT PERSON', 'TOTAL TRANSACTIONS', 'TOTAL RECEIVED', 'TOTAL DELIVERED', 'CURRENT BALANCE', 'TOTAL BILLED'])
+    summaryData.push(['CLIENT', 'GST NUMBER', 'TOTAL TRANSACTIONS', 'TOTAL RECEIVED', 'TOTAL DELIVERED', 'CURRENT BALANCE', 'TOTAL BILLED'])
 
     data.clients.forEach(client => {
       const clientTransactions = data.transactions.filter(t => t.client_id === client.id)
@@ -101,7 +101,7 @@ export class ExportService {
 
       summaryData.push([
         client.name,
-        client.contact_person || 'N/A',
+        client.gst_number || 'N/A',
         clientTransactions.length,
         totalReceived,
         totalDelivered,
@@ -466,7 +466,7 @@ export class ExportService {
 
   private static createSummaryCSV(data: ExportData): { content: string, filename: string } {
     const headers = [
-      'Client Name', 'Contact Person', 'Total Transactions', 'Total Received', 
+      'Client Name', 'GST Number', 'Total Transactions', 'Total Received', 
       'Total Delivered', 'Current Balance', 'Total Billed'
     ]
 
@@ -484,7 +484,7 @@ export class ExportService {
 
       return [
         client.name,
-        client.contact_person || 'N/A',
+        client.gst_number || 'N/A',
         clientTransactions.length,
         totalReceived,
         totalDelivered,
@@ -509,7 +509,7 @@ export class ExportService {
     
     // Client Summary Section
     csvContent += 'CLIENT SUMMARY\n'
-    csvContent += 'Client Name,Contact Person,Total Transactions,Total Received,Total Delivered,Current Balance,Total Billed\n'
+    csvContent += 'Client Name,GST Number,Total Transactions,Total Received,Total Delivered,Current Balance,Total Billed\n'
     
     data.clients.forEach(client => {
       const clientTransactions = data.transactions.filter(t => t.client_id === client.id)
@@ -522,7 +522,7 @@ export class ExportService {
       const totalBilled = clientTransactions
         .reduce((sum, t) => sum + (t.billed_amount || 0), 0)
 
-      csvContent += `"${client.name}","${client.contact_person || 'N/A'}",${clientTransactions.length},${totalReceived},${totalDelivered},${totalReceived - totalDelivered},${totalBilled}\n`
+      csvContent += `"${client.name}","${client.gst_number || 'N/A'}",${clientTransactions.length},${totalReceived},${totalDelivered},${totalReceived - totalDelivered},${totalBilled}\n`
     })
 
     csvContent += '\n\nTRANSACTION DETAILS\n'
@@ -629,7 +629,7 @@ export class ExportService {
 
     // Client Summary
     csvContent += 'CLIENT SUMMARY\n'
-    csvContent += 'S.No,Client Name,Contact Person,Total Transactions,Total Received,Total Delivered,Current Balance,Total Billed\n'
+    csvContent += 'S.No,Client Name,GST Number,Total Transactions,Total Received,Total Delivered,Current Balance,Total Billed\n'
     
     data.clients.forEach((client, index) => {
       const clientTransactions = data.transactions.filter(t => t.client_id === client.id)
@@ -642,7 +642,7 @@ export class ExportService {
       const totalBilled = clientTransactions
         .reduce((sum, t) => sum + (t.billed_amount || 0), 0)
 
-      csvContent += `${index + 1},"${client.name}","${client.contact_person || 'N/A'}",${clientTransactions.length},${totalReceived},${totalDelivered},${totalReceived - totalDelivered},${totalBilled}\n`
+      csvContent += `${index + 1},"${client.name}","${client.gst_number || 'N/A'}",${clientTransactions.length},${totalReceived},${totalDelivered},${totalReceived - totalDelivered},${totalBilled}\n`
     })
 
     csvContent += '\n\nTRANSACTION DETAILS\n'
@@ -722,7 +722,7 @@ export class ExportService {
 
       return [
         client.name,
-        client.contact_person || 'N/A',
+        client.gst_number || 'N/A',
         clientTransactions.length.toString(),
         totalReceived.toString(),
         totalDelivered.toString(),
