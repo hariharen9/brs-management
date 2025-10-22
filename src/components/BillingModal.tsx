@@ -1,32 +1,14 @@
 import { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
-import { 
-  Receipt, 
-  Calendar, 
-  User, 
-  Package, 
-  DollarSign, 
-  FileText, 
+import {
+  Calendar,
   Printer,
-  CheckCircle
+  X
 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from './ui/dialog'
 import { Button } from './ui/button'
-import { Badge } from './ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from './ui/table'
 import { useTransactions } from '../hooks/useTransactions'
 import { useClients } from '../hooks/useClients'
 
@@ -42,7 +24,7 @@ interface BillingModalProps {
 
 export function BillingModal({ open, onOpenChange, clientId, dateRange }: BillingModalProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<'current-month' | 'last-month' | 'custom'>('current-month')
-  
+
   const { data: clients = [] } = useClients()
   const { data: allTransactions = [] } = useTransactions(clientId)
 
@@ -75,9 +57,9 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
 
     return allTransactions.filter(transaction => {
       const transactionDate = new Date(transaction.date)
-      return transactionDate >= startDate && transactionDate <= endDate && 
-             transaction.transaction_type === 'Delivered' && 
-             transaction.billed_amount && transaction.billed_amount > 0
+      return transactionDate >= startDate && transactionDate <= endDate &&
+        transaction.transaction_type === 'Delivered' &&
+        transaction.billed_amount && transaction.billed_amount > 0
     })
   }, [allTransactions, selectedPeriod, dateRange])
 
@@ -148,280 +130,229 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
     window.print()
   }
 
-  // const handleDownload = () => {
-  //   // This would trigger a PDF download - for now just show a message
-  //   alert('PDF download functionality would be implemented here')
-  // }
-
   if (!client) {
     return null
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl lg:max-w-6xl max-h-[90vh] shadow-2xl border-0 p-0">
-        <div className="p-4 sm:p-6 lg:p-8 max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="border-b pb-4 mb-6">
-            <DialogTitle className="flex items-center space-x-3">
-              <Receipt className="w-6 h-6 text-blue-600" />
-              <span>BRS Industries Bill - {client.name}</span>
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-6">
-          {/* Period Selection */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium">Period:</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { key: 'current-month', label: 'Current' },
-                  { key: 'last-month', label: 'Last Month' },
-                  { key: 'custom', label: 'Custom' }
-                ].map(({ key, label }) => (
-                  <Button
-                    key={key}
-                    variant={selectedPeriod === key ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedPeriod(key as any)}
-                    className="text-xs"
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm" onClick={handlePrint}>
-                <Printer className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Print</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* Billing Header */}
-          <Card className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2">BILLING STATEMENT</h2>
-                  <div className="space-y-1 text-blue-100 text-sm sm:text-base">
-                    <div className="flex items-center space-x-2">
-                      <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate">Client: {client.name}</span>
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-6xl lg:max-w-7xl max-h-[95vh] shadow-2xl border-0 p-0 flex flex-col">
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Print-optimized Invoice */}
+          <div className="bg-white print:shadow-none p-8 print:p-6" id="invoice-content">
+            {/* Header - Company Info */}
+            <div className="border-b-2 border-gray-900 pb-6 mb-8 print:mb-6">
+              <div className="flex justify-between items-start">
+                <div className="flex items-start space-x-4">
+                  <img
+                    src="/brs.jpeg"
+                    alt="BRS Industries Logo"
+                    className="w-16 h-16 object-contain"
+                  />
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">BRS INDUSTRIES & SHOT-BLASTING</h1>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p>Processing & ShotBlasting Services</p>
+                      <p>GST: 33AFYPR4654L1ZK</p>
+                      <p>Phone: 9944913135, 9842211191</p>
+                      <p>Email: brsshotblasting11191@gmail.com, brsindustries13135@gmail.com</p>
                     </div>
-                    {client.gst_number && (
-                      <div className="flex items-center space-x-2">
-                        <span className="w-3 h-3 sm:w-4 sm:h-4 flex items-center justify-center flex-shrink-0">•</span>
-                        <span className="truncate">GST: {client.gst_number}</span>
-                      </div>
-                    )}
-                    {client.address && (
-                      <div className="flex items-center space-x-2">
-                        <span className="w-3 h-3 sm:w-4 sm:h-4 flex items-center justify-center flex-shrink-0">•</span>
-                        <span className="truncate">Address: {client.address}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate">Period: {getPeriodLabel()}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-left sm:text-right flex-shrink-0">
-                  <div className="text-blue-100 text-xs sm:text-sm">Total Amount</div>
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold">{formatCurrency(billingSummary.totalAmount)}</div>
-                  <div className="text-blue-200 text-xs sm:text-sm">{billingSummary.transactionCount} transactions</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <Package className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600">Total Quantity</div>
-                    <div className="text-xl font-bold">{billingSummary.totalQuantity.toLocaleString()}</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600">Total Weight</div>
-                    <div className="text-xl font-bold">{billingSummary.totalWeight.toLocaleString()} kg</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600">Avg Rate</div>
-                    <div className="text-xl font-bold">{formatCurrency(billingSummary.avgRate)}</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600">Transactions</div>
-                    <div className="text-xl font-bold">{billingSummary.transactionCount}</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Component-wise Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Package className="w-5 h-5" />
-                <span>Component-wise Billing Summary</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mobile-table-scroll">
-                <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Component</TableHead>
-                    <TableHead className="text-right">Transactions</TableHead>
-                    <TableHead className="text-right">Quantity</TableHead>
-                    <TableHead className="text-right">Weight (KG)</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-right">Avg Rate</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {Object.entries(billingSummary.componentSummary).map(([component, summary]) => (
-                    <TableRow key={component}>
-                      <TableCell className="font-medium">{component}</TableCell>
-                      <TableCell className="text-right">{summary.transactions}</TableCell>
-                      <TableCell className="text-right">{summary.quantity.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">{summary.weight.toLocaleString()}</TableCell>
-                      <TableCell className="text-right font-medium">{formatCurrency(summary.amount)}</TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(summary.quantity > 0 ? summary.amount / summary.quantity : 0)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Detailed Transaction List */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <FileText className="w-5 h-5" />
-                <span>Detailed Transaction List</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {filteredTransactions.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>No billable transactions found for the selected period</p>
-                </div>
-              ) : (
-                <div className="mobile-table-scroll">
-                  <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>DC No</TableHead>
-                      <TableHead>Component</TableHead>
-                      <TableHead>Lot No</TableHead>
-                      <TableHead className="text-right">Quantity</TableHead>
-                      <TableHead className="text-right">Weight (KG)</TableHead>
-                      <TableHead>Work Type</TableHead>
-                      <TableHead className="text-right">Rate</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredTransactions.map((transaction) => (
-                      <motion.tr
-                        key={transaction.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="hover:bg-gray-50"
-                      >
-                        <TableCell>{formatDate(transaction.date)}</TableCell>
-                        <TableCell className="font-mono text-sm">{transaction.dc_no}</TableCell>
-                        <TableCell className="font-medium">{transaction.component}</TableCell>
-                        <TableCell>{transaction.lot_no}</TableCell>
-                        <TableCell className="text-right">{transaction.qty_out?.toLocaleString()}</TableCell>
-                        <TableCell className="text-right">
-                          {transaction.weight_kg ? `${transaction.weight_kg.toLocaleString()}` : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs">
-                            {transaction.work_type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {transaction.rate_applied ? formatCurrency(transaction.rate_applied) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCurrency(transaction.billed_amount || 0)}
-                        </TableCell>
-                      </motion.tr>
-                    ))}
-                  </TableBody>
-                </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Total Summary */}
-          <Card className="bg-gray-50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="text-sm text-gray-600">Billing Summary for {getPeriodLabel()}</div>
-                  <div className="text-lg font-medium">
-                    {billingSummary.transactionCount} transactions • {billingSummary.totalQuantity.toLocaleString()} units • {billingSummary.totalWeight.toLocaleString()} kg
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-gray-600">Total Amount</div>
-                  <div className="text-2xl font-bold text-blue-600">{formatCurrency(billingSummary.totalAmount)}</div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">INVOICE</h2>
+                  <div className="text-sm space-y-1">
+                    <p><span className="font-semibold">Invoice #:</span> INV-{new Date().getFullYear()}-{String(new Date().getMonth() + 1).padStart(2, '0')}-{client.name.substring(0, 4).toUpperCase()}</p>
+                    <p><span className="font-semibold">Date:</span> {new Date().toLocaleDateString('en-IN')}</p>
+                    <p><span className="font-semibold">Period:</span> {getPeriodLabel()}</p>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Client Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-300 pb-1">BILL TO:</h3>
+                <div className="space-y-1 text-sm">
+                  <p className="font-semibold text-lg">{client.name}</p>
+                  {client.gst_number && <p><span className="font-medium">GST:</span> {client.gst_number}</p>}
+                  {client.address && <p><span className="font-medium">Address:</span> {client.address}</p>}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-300 pb-1">INVOICE SUMMARY:</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Total Transactions:</span>
+                    <span className="font-medium">{billingSummary.transactionCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Quantity:</span>
+                    <span className="font-medium">{billingSummary.totalQuantity.toLocaleString()} units</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Weight:</span>
+                    <span className="font-medium">{billingSummary.totalWeight.toLocaleString()} kg</span>
+                  </div>
+                  <div className="flex justify-between border-t pt-2 mt-2">
+                    <span className="font-semibold">Total Amount:</span>
+                    <span className="font-bold text-lg">{formatCurrency(billingSummary.totalAmount)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction Details Table */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-300 pb-1">TRANSACTION DETAILS:</h3>
+              {filteredTransactions.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 border border-gray-200 rounded">
+                  <p>No billable transactions found for the selected period</p>
+                </div>
+              ) : (
+                <div className="border border-gray-300 rounded overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="text-left p-3 border-b font-semibold">Date</th>
+                        <th className="text-left p-3 border-b font-semibold">DC No</th>
+                        <th className="text-left p-3 border-b font-semibold">Component</th>
+                        <th className="text-left p-3 border-b font-semibold">Lot No</th>
+                        <th className="text-right p-3 border-b font-semibold">Qty</th>
+                        <th className="text-right p-3 border-b font-semibold">Weight (kg)</th>
+                        <th className="text-left p-3 border-b font-semibold">Work Type</th>
+                        <th className="text-right p-3 border-b font-semibold">Rate</th>
+                        <th className="text-right p-3 border-b font-semibold">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredTransactions.map((transaction, index) => (
+                        <tr key={transaction.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="p-3 border-b">{formatDate(transaction.date)}</td>
+                          <td className="p-3 border-b font-mono">{transaction.dc_no}</td>
+                          <td className="p-3 border-b font-medium">{transaction.component}</td>
+                          <td className="p-3 border-b">{transaction.lot_no}</td>
+                          <td className="p-3 border-b text-right">{transaction.qty_out?.toLocaleString()}</td>
+                          <td className="p-3 border-b text-right">
+                            {transaction.weight_kg ? transaction.weight_kg.toLocaleString() : '-'}
+                          </td>
+                          <td className="p-3 border-b">{transaction.work_type === 'Both' ? 'Fettling and ShotBlasting' : transaction.work_type}</td>
+                          <td className="p-3 border-b text-right">
+                            {transaction.rate_applied ? formatCurrency(transaction.rate_applied) : '-'}
+                          </td>
+                          <td className="p-3 border-b text-right font-medium">
+                            {formatCurrency(transaction.billed_amount || 0)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Component Summary */}
+            {Object.keys(billingSummary.componentSummary).length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-300 pb-1">COMPONENT SUMMARY:</h3>
+                <div className="border border-gray-300 rounded overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="text-left p-3 border-b font-semibold">Component</th>
+                        <th className="text-right p-3 border-b font-semibold">Transactions</th>
+                        <th className="text-right p-3 border-b font-semibold">Total Qty</th>
+                        <th className="text-right p-3 border-b font-semibold">Total Weight (kg)</th>
+                        <th className="text-right p-3 border-b font-semibold">Total Amount</th>
+                        <th className="text-right p-3 border-b font-semibold">Avg Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(billingSummary.componentSummary).map(([component, summary], index) => (
+                        <tr key={component} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="p-3 border-b font-medium">{component}</td>
+                          <td className="p-3 border-b text-right">{summary.transactions}</td>
+                          <td className="p-3 border-b text-right">{summary.quantity.toLocaleString()}</td>
+                          <td className="p-3 border-b text-right">{summary.weight.toLocaleString()}</td>
+                          <td className="p-3 border-b text-right font-medium">{formatCurrency(summary.amount)}</td>
+                          <td className="p-3 border-b text-right">
+                            {formatCurrency(summary.quantity > 0 ? summary.amount / summary.quantity : 0)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Total and Footer */}
+            <div className="border-t-2 border-gray-900 pt-6">
+              <div className="flex justify-between items-end mb-8">
+                <div className="text-sm text-gray-600">
+                  <p className="mb-2"><span className="font-semibold">Payment Terms:</span> Next 30 days</p>
+                  <p><span className="font-semibold">Due Date:</span> {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN')}</p>
+                </div>
+                <div className="text-right">
+                  <div className="bg-gray-100 p-4 rounded border">
+                    <div className="text-sm text-gray-600 mb-1">TOTAL AMOUNT DUE</div>
+                    <div className="text-3xl font-bold text-gray-900">{formatCurrency(billingSummary.totalAmount)}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-end border-t pt-6 mt-8">
+                <div className="text-sm text-gray-600">
+                  <p>Thank you for your business!</p>
+                  <p className="mt-2">For any queries, please contact us at the above details.</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-600 mb-8">
+                    <p>Authorized Signature</p>
+                  </div>
+                  <div className="border-b border-gray-400 w-48 mb-2"></div>
+                  <p className="text-xs text-gray-500">BRS Industries</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Controls - Hidden in print */}
+          <div className="print:hidden sticky bottom-0 bg-white border-t p-4 flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-gray-600" />
+                <span className="text-sm font-medium">Period:</span>
+                <div className="flex space-x-1">
+                  {[
+                    { key: 'current-month', label: 'Current' },
+                    { key: 'last-month', label: 'Last Month' },
+                    { key: 'custom', label: 'Custom' }
+                  ].map(({ key, label }) => (
+                    <Button
+                      key={key}
+                      variant={selectedPeriod === key ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedPeriod(key as any)}
+                      className="text-xs"
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                <X className="w-4 h-4 mr-2" />
+                Close
+              </Button>
+              <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Printer className="w-4 h-4 mr-2" />
+                Print Invoice
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

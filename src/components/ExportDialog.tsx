@@ -135,8 +135,8 @@ export function ExportDialog({ open, onOpenChange, defaultClientId }: ExportDial
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-[95vw] sm:max-w-[600px] max-h-[90vh] shadow-2xl border-0 p-0">
-        <div className="p-4 sm:p-6 lg:p-8 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-[600px] max-h-[90vh] shadow-2xl border-0 p-0 flex flex-col">
+        <div className="p-4 sm:p-6 lg:p-8 flex-1 overflow-y-auto min-h-0">
           <DialogHeader className="mb-6">
             <DialogTitle className="flex items-center space-x-2">
               <Download className="w-5 h-5 text-blue-600" />
