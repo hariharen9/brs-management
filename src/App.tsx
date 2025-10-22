@@ -95,11 +95,13 @@ function AppContent() {
         <div className="container mx-auto px-4 sm:px-6 py-3 lg:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 lg:space-x-3">
-              <div className="w-7 h-7 lg:w-8 lg:h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xs lg:text-sm">BRS</span>
-              </div>
+              <img 
+                src="/brs.jpeg" 
+                alt="BRS Industries Logo" 
+                className="w-8 h-8 lg:w-10 lg:h-10 object-contain rounded-lg"
+              />
               <h1 className="text-lg lg:text-2xl font-bold bg-gradient-to-r from-gray-800 to-blue-800 bg-clip-text text-transparent">
-                <span className="hidden sm:inline">BRS Management System</span>
+                <span className="hidden sm:inline">BRS Admin Dashboard</span>
                 <span className="sm:hidden">BRS</span>
               </h1>
             </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Package, Truck, Scale, DollarSign, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { Plus, Package, Truck, Scale, DollarSign, MoreHorizontal, Edit, Trash2, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Button } from './ui/button'
 import {
@@ -10,6 +10,13 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from './ui/dropdown-menu'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select'
 import { KPICard } from './KPICard'
 import { TransactionForm } from './TransactionForm'
 import { AddClientForm } from './AddClientForm'
@@ -43,6 +50,14 @@ export function ClientDashboard() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
   const [isBillingModalOpen, setIsBillingModalOpen] = useState(false)
+  
+  // Pagination and filtering state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  })
   const { data: clients = [], isLoading: clientsLoading, error: clientsError } = useClients()
   
   // Set first client as active if none selected
@@ -56,6 +71,45 @@ export function ClientDashboard() {
   const deleteTransaction = useDeleteTransaction()
 
   const activeClient = clients.find(c => c.id === activeClientId)
+
+  // Filter transactions by selected month
+  const filteredTransactions = transactions.filter(transaction => {
+    const transactionDate = new Date(transaction.date)
+    const transactionMonth = `${transactionDate.getFullYear()}-${String(transactionDate.getMonth() + 1).padStart(2, '0')}`
+    return transactionMonth === selectedMonth
+  })
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex)
+
+  // Reset to first page when month or items per page changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [selectedMonth, itemsPerPage, activeClientId])
+
+  // Month navigation functions
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const [year, month] = selectedMonth.split('-').map(Number)
+    const currentDate = new Date(year, month - 1)
+    
+    if (direction === 'prev') {
+      currentDate.setMonth(currentDate.getMonth() - 1)
+    } else {
+      currentDate.setMonth(currentDate.getMonth() + 1)
+    }
+    
+    const newMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`
+    setSelectedMonth(newMonth)
+  }
+
+  const getMonthLabel = (monthString: string) => {
+    const [year, month] = monthString.split('-').map(Number)
+    const date = new Date(year, month - 1)
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  }
 
   // Keyboard shortcut for search (Cmd+K / Ctrl+K)
   useEffect(() => {
@@ -380,14 +434,14 @@ export function ClientDashboard() {
                       >
                         <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                         <span className="hidden xs:inline">Billing</span>
-                        <span className="xs:hidden">Billing</span>
+                        <span className="xs:hidden">Generate Bill</span>
                       </Button>
-                      <ExportButton 
+                      {/* <ExportButton 
                         onClick={() => setIsExportDialogOpen(true)}
                         variant="outline"
                         size="sm"
                         className="bg-white hover:bg-gray-50 text-xs sm:text-sm"
-                      />
+                      /> */}
                       <Button 
                         onClick={() => setIsTransactionFormOpen(true)}
                         size="sm"
@@ -397,6 +451,62 @@ export function ClientDashboard() {
                         <span className="hidden xs:inline">Add Transaction</span>
                         <span className="xs:hidden">Add</span>
                       </Button>
+                    </div>
+                  </div>
+
+                  {/* Month Navigation and Pagination Controls */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gray-50 p-4 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      {/* Month Navigation */}
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-4 h-4 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-700">Month:</span>
+                        <div className="flex items-center space-x-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigateMonth('prev')}
+                            className="h-8 w-8 p-0"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </Button>
+                          <div className="px-3 py-1 bg-white border rounded text-sm font-medium min-w-[120px] text-center">
+                            {getMonthLabel(selectedMonth)}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigateMonth('next')}
+                            className="h-8 w-8 p-0"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                      {/* Items per page */}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">Show:</span>
+                        <Select value={itemsPerPage.toString()} onValueChange={(value) => setItemsPerPage(Number(value))}>
+                          <SelectTrigger className="w-20 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="25">25</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Pagination Info */}
+                      {filteredTransactions.length > 0 && (
+                        <div className="text-sm text-gray-600">
+                          {startIndex + 1}-{Math.min(endIndex, filteredTransactions.length)} of {filteredTransactions.length}
+                        </div>
+                      )}
                     </div>
                   </div>
                   {transactionsLoading ? (
@@ -414,12 +524,81 @@ export function ClientDashboard() {
                         onClick: () => setIsTransactionFormOpen(true)
                       }}
                     />
-                  ) : (
-                    <TransactionLogTable 
-                      data={transactions} 
-                      onEdit={handleEditTransaction}
-                      onDelete={handleDeleteTransaction}
+                  ) : filteredTransactions.length === 0 ? (
+                    <TableEmptyState
+                      title="No Transactions This Month"
+                      description={`No transactions found for ${getMonthLabel(selectedMonth)}. Try a different month or add a new transaction.`}
+                      action={{
+                        label: "Add Transaction",
+                        onClick: () => setIsTransactionFormOpen(true)
+                      }}
                     />
+                  ) : (
+                    <>
+                      <TransactionLogTable 
+                        data={paginatedTransactions} 
+                        onEdit={handleEditTransaction}
+                        onDelete={handleDeleteTransaction}
+                      />
+                      
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between mt-4">
+                          <div className="text-sm text-gray-600">
+                            Page {currentPage} of {totalPages}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              disabled={currentPage === 1}
+                            >
+                              <ChevronLeft className="w-4 h-4 mr-1" />
+                              Previous
+                            </Button>
+                            
+                            {/* Page Numbers */}
+                            <div className="flex items-center space-x-1">
+                              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                                let pageNum
+                                if (totalPages <= 5) {
+                                  pageNum = i + 1
+                                } else if (currentPage <= 3) {
+                                  pageNum = i + 1
+                                } else if (currentPage >= totalPages - 2) {
+                                  pageNum = totalPages - 4 + i
+                                } else {
+                                  pageNum = currentPage - 2 + i
+                                }
+                                
+                                return (
+                                  <Button
+                                    key={pageNum}
+                                    variant={currentPage === pageNum ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => setCurrentPage(pageNum)}
+                                    className="w-8 h-8 p-0"
+                                  >
+                                    {pageNum}
+                                  </Button>
+                                )
+                              })}
+                            </div>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                              disabled={currentPage === totalPages}
+                            >
+                              Next
+                              <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </motion.div>

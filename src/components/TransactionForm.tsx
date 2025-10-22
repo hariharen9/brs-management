@@ -201,8 +201,8 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="w-full max-w-[95vw] sm:max-w-[700px] max-h-[90vh] shadow-2xl border-0 p-0">
-        <div className="p-4 sm:p-6 lg:p-8 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-[700px] max-h-[90vh] shadow-2xl border-0 p-0 flex flex-col">
+        <div className="p-4 sm:p-6 lg:p-8 flex-1 overflow-y-auto min-h-0">
           <DialogHeader className="mb-6">
             <DialogTitle>
               {isEditing ? 'Edit Transaction' : 'Add New Transaction'}
@@ -357,10 +357,10 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
                 <Input
                   id="quantity"
                   type="number"
-                  step="0.01"
+                  step="1"
                   placeholder="Enter quantity"
                   {...form.register('qty_out', {
-                    setValueAs: (value) => value === '' ? null : parseFloat(value)
+                    setValueAs: (value) => value === '' ? null : parseInt(value) || null
                   })}
                 />
               </div>
