@@ -6,6 +6,7 @@ import { Button } from './components/ui/button'
 import { ClientDashboard } from './components/ClientDashboard'
 import { RateMaster } from './components/RateMaster'
 import { Analytics } from './components/Analytics'
+import { Billing } from './components/Billing'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { useRealtimeSubscription } from './hooks/useRealtimeSubscription'
@@ -116,6 +117,7 @@ function AppContent() {
           <Route path="/dashboard" element={<ClientDashboard />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/rates" element={<RateMaster />} />
+          <Route path="/billing" element={<Billing />} />
         </Routes>
       </main>
 
