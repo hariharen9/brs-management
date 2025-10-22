@@ -77,7 +77,7 @@ export class TemplateBasedExportService {
 
     // Client details table
     sheetData.push(['CLIENT DETAILS'])
-    sheetData.push(['S.No', 'Client Name', 'Contact Person', 'Total Transactions', 'Total Received', 'Total Delivered', 'Current Balance', 'Total Billed'])
+    sheetData.push(['S.No', 'Client Name', 'GST Number', 'Total Transactions', 'Total Received', 'Total Delivered', 'Current Balance', 'Total Billed'])
 
     data.clients.forEach((client, index) => {
       const clientTransactions = data.transactions.filter(t => t.client_id === client.id)
@@ -94,7 +94,7 @@ export class TemplateBasedExportService {
       sheetData.push([
         index + 1,
         client.name,
-        client.contact_person || 'N/A',
+        client.gst_number || 'N/A',
         clientTransactions.length,
         totalReceived,
         totalDelivered,
@@ -110,7 +110,7 @@ export class TemplateBasedExportService {
     worksheet['!cols'] = [
       { width: 8 },   // S.No
       { width: 25 },  // Client Name
-      { width: 20 },  // Contact Person
+      { width: 20 },  // GST Number
       { width: 15 },  // Total Transactions
       { width: 15 },  // Total Received
       { width: 15 },  // Total Delivered

@@ -56,7 +56,6 @@ interface TransactionFormProps {
 
 export function TransactionForm({ open, onOpenChange, clientId, clientName, editingTransaction }: TransactionFormProps) {
   const [isLoadingRate, setIsLoadingRate] = useState(false)
-  const [customComponent, setCustomComponent] = useState('')
   const createTransaction = useCreateTransaction()
   const updateTransaction = useUpdateTransaction()
   const { data: uniqueComponents = [] } = useUniqueComponents(clientId)
@@ -102,12 +101,7 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
         billed_amount: editingTransaction.billed_amount,
       })
 
-      // Set custom component if it's not in the dropdown list
-      if (componentValue && !uniqueComponents.includes(componentValue)) {
-        setCustomComponent(componentValue)
-      } else {
-        setCustomComponent('')
-      }
+      // Custom component handling is now automatic based on whether the component is in uniqueComponents
     } else {
       form.reset({
         client_id: clientId,
@@ -124,7 +118,7 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
         rate_applied: null,
         billed_amount: null,
       })
-      setCustomComponent('')
+      // Custom component state is no longer needed
     }
   }, [editingTransaction, clientId, form, uniqueComponents])
 
@@ -281,13 +275,13 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
                   <Label htmlFor="component">Component</Label>
                   <div className="space-y-2">
                     <Select
-                      value={component || 'custom'}
+                      value={uniqueComponents.includes(component || '') ? component : 'custom'}
                       onValueChange={(value) => {
                         if (value === 'custom') {
-                          form.setValue('component', customComponent)
+                          // Don't change the form value, just show the input
+                          // The input will handle setting the form value
                         } else {
                           form.setValue('component', value)
-                          setCustomComponent('')
                         }
                       }}
                     >
@@ -306,12 +300,11 @@ export function TransactionForm({ open, onOpenChange, clientId, clientName, edit
                       </SelectContent>
                     </Select>
 
-                    {(component === customComponent || !uniqueComponents.includes(component || '')) && (
+                    {!uniqueComponents.includes(component || '') && (
                       <Input
                         placeholder="Enter component name"
-                        value={customComponent || component}
+                        value={component || ''}
                         onChange={(e) => {
-                          setCustomComponent(e.target.value)
                           form.setValue('component', e.target.value)
                         }}
                       />

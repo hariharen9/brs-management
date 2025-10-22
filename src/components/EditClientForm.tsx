@@ -19,7 +19,8 @@ import type { Client } from '../types'
 
 const clientSchema = z.object({
   name: z.string().min(1, 'Company name is required'),
-  contact_person: z.string().optional(),
+  gst_number: z.string().optional(),
+  address: z.string().optional(),
 })
 
 type ClientFormData = z.infer<typeof clientSchema>
@@ -37,7 +38,8 @@ export function EditClientForm({ open, onOpenChange, client }: EditClientFormPro
     resolver: zodResolver(clientSchema),
     defaultValues: {
       name: client?.name || '',
-      contact_person: client?.contact_person || '',
+      gst_number: client?.gst_number || '',
+      address: client?.address || '',
     },
   })
 
@@ -46,7 +48,8 @@ export function EditClientForm({ open, onOpenChange, client }: EditClientFormPro
     if (client) {
       form.reset({
         name: client.name,
-        contact_person: client.contact_person || '',
+        gst_number: client.gst_number || '',
+        address: client.address || '',
       })
     }
   }, [client, form])
@@ -59,7 +62,8 @@ export function EditClientForm({ open, onOpenChange, client }: EditClientFormPro
         id: client.id,
         updates: {
           name: data.name,
-          contact_person: data.contact_person || null,
+          gst_number: data.gst_number || null,
+          address: data.address || null,
         }
       })
       onOpenChange(false)
@@ -99,11 +103,20 @@ export function EditClientForm({ open, onOpenChange, client }: EditClientFormPro
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="contact_person">Contact Person</Label>
+            <Label htmlFor="gst_number">GST Number</Label>
             <Input
-              id="contact_person"
-              placeholder="Enter contact person name (optional)"
-              {...form.register('contact_person')}
+              id="gst_number"
+              placeholder="Enter GST number (optional)"
+              {...form.register('gst_number')}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">Company Address</Label>
+            <Input
+              id="address"
+              placeholder="Enter company address (optional)"
+              {...form.register('address')}
             />
           </div>
 
