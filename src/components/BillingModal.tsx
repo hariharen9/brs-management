@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Calendar,
   Printer,
-  X
+  X,
+  FileText
 } from 'lucide-react'
 import {
   Dialog,
@@ -23,6 +25,7 @@ interface BillingModalProps {
 }
 
 export function BillingModal({ open, onOpenChange, clientId, dateRange }: BillingModalProps) {
+  const navigate = useNavigate()
   const [selectedPeriod, setSelectedPeriod] = useState<'current-month' | 'last-month' | 'custom'>('current-month')
 
   const { data: clients = [] } = useClients()
@@ -89,13 +92,31 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
       return acc
     }, {} as Record<string, { quantity: number; weight: number; amount: number; transactions: number }>)
 
+    // GST Calculations (6% CGST + 6% SGST = 12% total)
+    const cgstRate = 0.06 // 6%
+    const sgstRate = 0.06 // 6%
+    const totalGstRate = cgstRate + sgstRate // 12%
+
+    const cgstAmount = totalAmount * cgstRate
+    const sgstAmount = totalAmount * sgstRate
+    const totalGstAmount = cgstAmount + sgstAmount
+    const totalAmountWithGst = totalAmount + totalGstAmount
+
     return {
-      totalAmount,
+      totalAmount, // Amount before tax
       totalQuantity,
       totalWeight,
       transactionCount,
       avgRate,
-      componentSummary
+      componentSummary,
+      // GST Details
+      cgstAmount,
+      sgstAmount,
+      totalGstAmount,
+      totalAmountWithGst,
+      cgstRate,
+      sgstRate,
+      totalGstRate
     }
   }, [filteredTransactions])
 
@@ -130,6 +151,12 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
     window.print()
   }
 
+  const handleGenerateBill = () => {
+    // Close the modal and navigate to the billing page for this client
+    onOpenChange(false)
+    navigate(`/billing?clientId=${clientId}`)
+  }
+
   if (!client) {
     return null
   }
@@ -139,9 +166,9 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
       <DialogContent className="w-full max-w-[95vw] sm:max-w-6xl lg:max-w-7xl max-h-[95vh] shadow-2xl border-0 p-0 flex flex-col">
         <div className="flex-1 overflow-y-auto min-h-0">
           {/* Print-optimized Invoice */}
-          <div className="bg-white print:shadow-none p-8 print:p-6" id="invoice-content">
+          <div className="bg-white p-8" id="invoice-content">
             {/* Header - Company Info */}
-            <div className="border-b-2 border-gray-900 pb-6 mb-8 print:mb-6">
+            <div className="border-b-2 border-gray-900 pb-6 mb-8">
               <div className="flex justify-between items-start">
                 <div className="flex items-start space-x-4">
                   <img
@@ -195,9 +222,23 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
                     <span>Total Weight:</span>
                     <span className="font-medium">{billingSummary.totalWeight.toLocaleString()} kg</span>
                   </div>
-                  <div className="flex justify-between border-t pt-2 mt-2">
-                    <span className="font-semibold">Total Amount:</span>
-                    <span className="font-bold text-lg">{formatCurrency(billingSummary.totalAmount)}</span>
+                  <div className="border-t pt-2 mt-2 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Subtotal (Before Tax):</span>
+                      <span className="font-medium">{formatCurrency(billingSummary.totalAmount)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>CGST (6%):</span>
+                      <span>{formatCurrency(billingSummary.cgstAmount)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-600">
+                      <span>SGST (6%):</span>
+                      <span>{formatCurrency(billingSummary.sgstAmount)}</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-1 mt-1">
+                      <span className="font-semibold">Total Amount (Inc. GST):</span>
+                      <span className="font-bold text-lg">{formatCurrency(billingSummary.totalAmountWithGst)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -296,11 +337,16 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
                 </div>
                 <div className="text-right">
                   <div className="bg-gray-100 p-4 rounded border">
-                    <div className="text-sm text-gray-600 mb-1">TOTAL AMOUNT DUE</div>
-                    <div className="text-3xl font-bold text-gray-900">{formatCurrency(billingSummary.totalAmount)}</div>
+                    <div className="text-sm text-gray-600 mb-1">TOTAL AMOUNT DUE (Inc. GST)</div>
+                    <div className="text-3xl font-bold text-gray-900">{formatCurrency(billingSummary.totalAmountWithGst)}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Subtotal: {formatCurrency(billingSummary.totalAmount)} + GST: {formatCurrency(billingSummary.totalGstAmount)}
+                    </div>
                   </div>
                 </div>
               </div>
+
+
 
               <div className="flex justify-between items-end border-t pt-6 mt-8">
                 <div className="text-sm text-gray-600">
@@ -319,7 +365,7 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
           </div>
 
           {/* Controls - Hidden in print */}
-          <div className="print:hidden sticky bottom-0 bg-white border-t p-4 flex justify-between items-center">
+          <div className="print:hidden sticky bottom-0 bg-white border-t p-4 flex justify-between items-center" id="modal-controls">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <Calendar className="w-4 h-4 text-gray-600" />
@@ -348,9 +394,13 @@ export function BillingModal({ open, onOpenChange, clientId, dateRange }: Billin
                 <X className="w-4 h-4 mr-2" />
                 Close
               </Button>
-              <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={handlePrint} variant="outline" className="border-blue-600 text-blue-600 hover:bg-blue-50">
                 <Printer className="w-4 h-4 mr-2" />
-                Print Invoice
+                Print Quick Invoice
+              </Button>
+              <Button onClick={handleGenerateBill} className="bg-green-600 hover:bg-green-700 text-white">
+                <FileText className="w-4 h-4 mr-2" />
+                Customize Bill
               </Button>
             </div>
           </div>
