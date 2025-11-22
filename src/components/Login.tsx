@@ -178,7 +178,7 @@ export function Login() {
             <span className="text-red-500">❤️</span>
             {' '}by{' '}
             <a
-              href="https://hariharen9.site"
+              href="https://hariharen.site"
               target="_blank"
               rel="noopener noreferrer"
               className="font-semibold text-blue-600 hover:text-blue-800 transition-colors duration-200 hover:underline"
